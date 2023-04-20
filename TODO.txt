@@ -1,0 +1,22 @@
+
+//DONE
+// mb array[10] to count average fps
+// test button inputs and gamepad - working
+// make fps independent game loop (with sf::Clock i guess)
+
+TODO - make test game
+
+character control and objects render
+divide code to different cpp files
+try different "scenes" or/and side-scrolling
+make RPG and collisions
+maybe make rez options (with buttons only for now)
+try OpenGL integration
+try online sockets
+maybe build custom fps lock with sleep(sf::asMicroseconds) (or with chrono and thread)
+FPS Monitor (sometimes?) crashes SFML window upon closing FPS Monitor
+switch fps/frametime outputs with buttons
+output ingame timer to ensure it works properly
+
+RayLib:
+fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)
