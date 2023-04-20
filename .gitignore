@@ -1,4 +1,6 @@
 /cmake-build-debug/*
 !/cmake-build-debug/Game_data/
 /.idea
-/raylib
+/raylib/*
+!/raylib/src
+/raylib/src/external
