@@ -6,11 +6,12 @@
 
 TODO - make test game
 
-character control and objects render
 divide code to different cpp files
-try different "scenes" or/and side-scrolling
-make RPG and collisions
+character control and objects render
+screen scaling and camera
 maybe make rez options (with buttons only for now)
+try different "scenes" or/and side-scrolling
+make RPG-7 and collisions
 try OpenGL integration
 try online sockets
 maybe build custom fps lock with sleep(sf::asMicroseconds) (or with chrono and thread)
