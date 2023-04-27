@@ -6,7 +6,7 @@
 int main(void){
     // Initialization-----------------------------------------------------------------
 
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE );// |FLAG_VSYNC_HINT);
     InitWindow(window_width, window_height, "TEST WINDOW");
 
     // Render texture initialization, used to hold the rendering result so we can easily resize it
@@ -76,25 +76,21 @@ int main(void){
         //window content scaling
 
 
+        window_width = GetScreenWidth();
+        window_height = GetScreenHeight();
         if(IsWindowResized()) {
-            window_width = GetScreenWidth();
-            window_height = GetScreenHeight();
             scale_x = (float)GetScreenWidth() / initial_window_width ; // scales should be global i guess
             scale_y = (float)GetScreenHeight() / initial_window_height ;
-
 
             //texture2d_resize(&texture_bunny);// harder version of window resizing - not done - need to resize every texture - maybe overkill, not needed
         }
 
         // Draw -------------------------------------------------------------------------
+        // Draw everything in the render texture, note this will not be rendered on screen, yet
+        BeginTextureMode(target);
+        ClearBackground(LIGHTGRAY);  // Clear render texture background color
 
-
-
-        BeginDrawing();
-
-        ClearBackground(LIGHTGRAY);
-
-        DrawTextureEx(texture_bunny, (Vector2){ (float)player_x * scale_x, (float)player_y * scale_y }, 0, 6, WHITE);
+        DrawTextureEx(texture_bunny, (Vector2){ (float)player_x, (float)player_y}, 0, 6, WHITE);
 
         if(IsWindowFullscreen()){
             DrawText("WINDOW IS FULLSCREEN", 200, 40, 40, RED);
@@ -104,12 +100,19 @@ int main(void){
         }
         DrawText(TextFormat( "CURRENT MONITOR: %i", GetCurrentMonitor()), 200, 0, 40, RED);
         //DrawText(TextFormat( "X: %i \nY: %i", int(GetWindowPosition().x),int(GetWindowPosition().y)), 200, 200, 20, DARKGRAY);
-
-
         DrawFPS(10,10);
-        //draw_screen_center();
+        DrawText(TextFormat( "FRAMETIME: %f", GetFrameTime() *1000), 10, 40, 20, LIME);
+        //draw_screen_center(); // make this toggle
+        EndTextureMode();
+
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+
+        // Draw render texture to screen, properly scaled
+        DrawTexturePro(target.texture, (Rectangle){ 0.0f, 0.0f, (float)target.texture.width, (float)-target.texture.height },
+                   (Rectangle){(GetScreenWidth() - ((float)initial_window_width*scale_x))*0.5f, (GetScreenHeight() - ((float)initial_window_height*scale_y))*0.5f,
+                            (float)initial_window_width*scale_x, (float)initial_window_height*scale_y }, (Vector2){ 0, 0 }, 0.0f, WHITE);
         EndDrawing();
-        //----------------------------------------------------------------------------------
     }
 
     // De-Initialization -------------------------------------------------------------------

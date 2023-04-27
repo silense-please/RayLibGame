@@ -43,8 +43,8 @@ void toggle_fullscreen(){ // not finished - work in progress
 
 // Crosshair in the center of screen demonstrating current window moonitor
 void draw_screen_center(){
-    DrawRectangle(window_width / 2 - 2, window_height / 2 - 35, 5, 70, RED);
-    DrawRectangle(window_width / 2 - 35, window_height / 2 - 2, 70, 5, RED);
+    DrawRectangle(initial_window_width / 2 - 2, initial_window_height / 2 - 35, 5, 70, RED);
+    DrawRectangle(initial_window_width / 2 - 35, initial_window_height / 2 - 2, 70, 5, RED);
 }
 
 //Hard texture resize

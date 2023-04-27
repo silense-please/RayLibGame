@@ -22,4 +22,8 @@ output ingame timer to ensure it works properly
 Problems:
     fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)
     window resizing - use render target texture
+    Performance slowdown - might be a bottleneck(probably fine) :
+                target render texture - fps dropped form ~2500 to ~2000
+                borderless mode - fps dropped form ~2000 to ~1700 , frametime from ~0,3-4ms to ~0,5ms
+
 

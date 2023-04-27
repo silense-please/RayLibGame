@@ -11,7 +11,7 @@
 //------------------------------------------------------------------------------------
 int main(void)
 {
-    const int windowWidth = 800; //initial window size
+    const int windowWidth = 800;
     const int windowHeight = 450;
 
     // Enable config flags for resizable window and vertical synchro
@@ -19,7 +19,7 @@ int main(void)
     InitWindow(windowWidth, windowHeight, "raylib [core] example - window scale letterbox");
     SetWindowMinSize(320, 240);
 
-    int gameScreenWidth = 640;  // current window size
+    int gameScreenWidth = 640;
     int gameScreenHeight = 480;
 
     // Render texture initialization, used to hold the rendering result so we can easily resize it
