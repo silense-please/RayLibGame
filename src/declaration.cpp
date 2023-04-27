@@ -2,7 +2,7 @@
 
 
 bool _is_borderless = false; // this better be global value (use 'extern')
-int window_width = 1280; // maybe '_' (internal) too
+int window_width = 1280 ; // maybe '_' (internal) too
 int window_height = 720;
 
 //initial "source" screen resolution - maybe move to global
