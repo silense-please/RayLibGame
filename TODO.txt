@@ -1,8 +1,8 @@
 
-//DONE
-// mb array[10] to count average fps
-// test button inputs and gamepad - working
-// make fps independent game loop (with sf::Clock i guess)
+DONE
+mb array[10] to count average fps
+test button inputs and gamepad - working
+make fps independent game loop (with sf::Clock i guess)
 
 TODO - make test game
 
@@ -19,5 +19,7 @@ FPS Monitor (sometimes?) crashes SFML window upon closing FPS Monitor
 switch fps/frametime outputs with buttons
 output ingame timer to ensure it works properly
 
-RayLib:
-fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)
+Problems:
+    fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)
+    window resizing - use render target texture
+
