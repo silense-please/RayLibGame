@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 14)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/raylib)
 
 add_executable(RayLibGame src/main.cpp)
-#add_executable(RayLibGame raylib/examples/core/core_smooth_pixelperfect.c)
+#add_executable(RayLibGame raylib/examples/core/core_input_gamepad.c)
 #add_executable(RayLibGame src/bunny_mark.cpp)
 #add_executable(RayLibGame src/shadows_example.cpp)
 

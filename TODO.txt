@@ -5,28 +5,36 @@ test button inputs and gamepad - working
 make fps independent game loop (with sf::Clock i guess)
 divide code to different cpp files
 window resizing - use render target texture - DONE
+screen scaling
+recreate everything from sfml template
+character control (inputs) - add input method choosing (gamepad 1, gamepad 2, keyboard?) and current detected gamepads
 
 TODO - make test game
 
-character control and objects render
-screen scaling and camera
+divide code to funtions and structs(like: Playerstruct, draw_debugging_metrics, draw, toggle_fps_lock, ...)
+objects render
+level editor (in txt for now)
+make RPG-7 and collisions
+camera
+pause system
+sound system
 maybe make rez options (with buttons only for now)
 try different "scenes" or/and side-scrolling
-make RPG-7 and collisions
 try OpenGL integration
 try online sockets
 maybe build custom fps lock with sleep(sf::asMicroseconds) (or with chrono and thread)
-FPS Monitor (sometimes?) crashes SFML window upon closing FPS Monitor
 switch fps/frametime outputs with buttons
-output ingame timer to ensure it works properly
+Define and write down to txt all game(window) inputs
 
 Problems:
     fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)
     Performance slowdown - might be a bottleneck(probably fine) :
                 target render texture - fps dropped form ~2500 to ~2000
                 borderless mode - fps dropped form ~2000 to ~1700 , frametime from ~0,3-4ms to ~0,5ms
+                (borderless is more expensive)
     initial resolution and aspect ratio is hardcoded - might need resize_texture2d
-    cursor is disappearing in borderless
+    cursor is disappearing in borderless with discord or OBS - Well... what can I do?
+    FPS Monitor (sometimes?) crashes SFML window upon closing FPS Monitor
 
 
 

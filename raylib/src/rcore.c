@@ -3752,8 +3752,16 @@ bool IsGamepadButtonDown(int gamepad, int button)
 {
     bool result = false;
 
-    if ((gamepad < MAX_GAMEPADS) && CORE.Input.Gamepad.ready[gamepad] && (button < MAX_GAMEPAD_BUTTONS) &&
-        (CORE.Input.Gamepad.currentButtonState[gamepad][button] == 1)) result = true;
+    if (gamepad < MAX_GAMEPADS){
+        if(CORE.Input.Gamepad.ready[gamepad]){
+            if(button < MAX_GAMEPAD_BUTTONS) {
+                if(CORE.Input.Gamepad.currentButtonState[gamepad][button] == 1){
+
+                    result = true;
+                }
+            }
+        }
+    }
 
     return result;
 }
