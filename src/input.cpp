@@ -1,6 +1,18 @@
 
+
+void toggle_framelock(){
+    if (_fps_lock){
+        SetTargetFPS(0);
+    }
+    else{
+        SetTargetFPS(120);
+    }
+    _fps_lock = ! _fps_lock;
+
+}
+
+
 void toggle_borderless(){
-    static Vector2 window_position; //= GetWindowPosition(); //better be global value
     static int saved_width = GetScreenHeight();
     static int saved_height = GetScreenWidth();
     if (_is_borderless){ //Restore Windowed mode
@@ -27,7 +39,7 @@ void toggle_borderless(){
 void toggle_fullscreen(){ // not finished - work in progress
 
     //this is fullscreen - works fine entering fullscreen but cant exit fullscreen, ToggleFullscreen works like shit
-    // becauce refresh rate is not specified. Need to mess with RayLib functions(or add new) to make this work.
+    // because refresh rate is not specified. Need to mess with RayLib functions(or add new) to make this work.
     // BUT this fullscreen does not stretches the content of the window
     if (IsKeyPressed(KEY_ONE) && (IsKeyDown(KEY_LEFT_CONTROL))){
         SetWindowMonitor(0);
@@ -38,67 +50,13 @@ void toggle_fullscreen(){ // not finished - work in progress
     if (IsKeyPressed(KEY_THREE) && (IsKeyDown(KEY_LEFT_CONTROL))){
         SetWindowMonitor(2);
     }
-}
-
-
-//Hard texture resize
-void texture2d_resize(Texture2D  *texture){
-
-
-    //иногда пиксели подглючивают(в максимайзд например)
-    static int tex_bunny_width = texture->width;
-    static int tex_bunny_height = texture->height;
-
-    //this is not fixing artefacts
-//    player_image = LoadImage("Game_Data/player.png");
-//    ImageResizeNN(&player_image,tex_bunny_width * scale_x, tex_bunny_height * scale_y);
-//    UnloadTexture(player_texture);
-//    player_texture = LoadTextureFromImage(player_image);
-
-    texture->width = tex_bunny_width * scale_x ;
-    texture->height = tex_bunny_height * scale_y;
-
-}
-
-
-
-
-
-// Crosshair in the center of screen demonstrating current window moonitor
-void draw_screen_center(){
-    DrawRectangle(initial_window_width / 2 - 2, initial_window_height / 2 - 35, 5, 70, RED);
-    DrawRectangle(initial_window_width / 2 - 35, initial_window_height / 2 - 2, 70, 5, RED);
-}
-
-
-// Draw current connected gamepads (for debugging)
-void draw_gamepads(){
-    int max_gamepads = 4;// defined in raylib config - mb global
-    for (int current_gamepad = 0; current_gamepad < max_gamepads; ++current_gamepad) {
-        if (IsGamepadAvailable(current_gamepad)){
-            DrawText(TextFormat("GP%current_gamepad: %s", current_gamepad + 1, GetGamepadName(current_gamepad)), 700, 10 + current_gamepad * 40, 30, BLACK);
-        }
-        else{
-            DrawText(TextFormat("GP%current_gamepad: DISCONNECTED", current_gamepad + 1), 700, 10 + current_gamepad * 40, 30, BLACK);
-        }
-    }
-    DrawText(TextFormat("CURRENT GAMEPAD: %i", active_gamepad + 1), 700, 160, 30, BLACK);
-}
-
-
-// Displays current gamepad dicsconnected warning
-void gamepad_disconnect_warning(){
-    if(!IsGamepadAvailable(active_gamepad)){
-        DrawText("CURRENT GAMEPAD DISCONNECTED !!!", 50, 250, 60, RED);
+    if (IsKeyPressed(KEY_Q) && (IsKeyDown(KEY_LEFT_CONTROL))){
+        ToggleFullscreen();
     }
 }
 
 
-
-
-
-
-
+// Switch active used gamepad from 1 up to 4
 void switch_active_gamepad(){
     if (IsKeyPressed(KEY_ONE) && (IsKeyDown(KEY_G))){
         active_gamepad = 0;
@@ -115,6 +73,25 @@ void switch_active_gamepad(){
 }
 
 
+void process_input(Player& player){
+    switch_active_gamepad();
+    int scaled_mouse_x = GetMouseX() / scale_x;
+    int scaled_mouse_y = GetMouseY() / scale_y;
 
 
+    if (IsKeyPressed(KEY_L)) toggle_framelock();
+    if (IsKeyPressed(KEY_F)) toggle_borderless();
+    toggle_fullscreen(); // not finished
+
+    player.speed = GetFrameTime() * player.acceleration;
+
+    if (IsKeyDown(KEY_W) || IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_UP)){ player.y -= player.speed;}
+    if (IsKeyDown(KEY_S)|| IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_DOWN)){ player.y += player.speed;}
+    if (IsKeyDown(KEY_A)|| IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_LEFT)){ player.x -= player.speed;}
+    if (IsKeyDown(KEY_D)|| IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_RIGHT)){ player.x += player.speed;}
+    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+        player.x = scaled_mouse_x;
+        player.y = scaled_mouse_y;
+    }
+}
 

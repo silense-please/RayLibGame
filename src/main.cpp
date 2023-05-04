@@ -1,7 +1,7 @@
 #include "raylib.h"
 #include "declaration.cpp"
-#include "functions.cpp"
-
+#include "input.cpp"
+#include "draw.cpp"
 
 int main(void){
     // Initialization-----------------------------------------------------------------
@@ -30,93 +30,43 @@ int main(void){
     SetMusicPan( music, 0.5);
     PlayMusicStream(music);
 
-    float player_x = 0;
-    float player_y = 0;
-    float player_speed = 0;
+
+    Player player;
+
 
     // Main game loop
     while (!WindowShouldClose()){
 
-        // Process Input -----------------------------------------------------------------------
-        switch_active_gamepad();
-        int scaled_mouse_x = GetMouseX() / scale_x;
-        int scaled_mouse_y = GetMouseY() / scale_y;
+        window_width = GetScreenWidth();
+        window_height = GetScreenHeight();
         //UpdateMusicStream(music); // PLAY MUSIC
 
-        player_speed = GetFrameTime() * player_acceleration;
+        // Process Input -----------------------------------------------------------------------
 
-        static bool fps_locked = true;
-        if (IsKeyPressed(KEY_T)){
-            if (fps_locked){
-                SetTargetFPS(0);
-                fps_locked = false;
-            }
-            else{
-                SetTargetFPS(120);
-                fps_locked = true;
-            }
-        }
+        process_input(player);
 
-        if (IsKeyPressed(KEY_F)){toggle_borderless();}
-
-        if (IsKeyDown(KEY_W) || IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_UP)){ player_y -= player_speed;}
-        if (IsKeyDown(KEY_S)|| IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_DOWN)){ player_y += player_speed;}
-        if (IsKeyDown(KEY_A)|| IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_LEFT)){ player_x -= player_speed;}
-        if (IsKeyDown(KEY_D)|| IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_RIGHT)){ player_x += player_speed;}
-        if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
-            player_x = scaled_mouse_x;
-            player_y = scaled_mouse_y;
-        }
-
-        toggle_fullscreen(); // not finished
 
         // Game Logic -------------------------------------------------------------------
 
 
 
-
-        //window content scaling
-
-
-        window_width = GetScreenWidth();
-        window_height = GetScreenHeight();
-        if(IsWindowResized()) {
-            scale_x = (float)GetScreenWidth() / initial_window_width ; // scales should be global i guess
-            scale_y = (float)GetScreenHeight() / initial_window_height ;
-
-            //texture2d_resize(&player_texture);// harder version of window resizing - not done - need to resize every texture - maybe overkill, not needed
-        }
-
         // Draw -------------------------------------------------------------------------
+        apply_screen_scale();
+
         // Draw everything in the render texture, note this will not be rendered on screen, yet
         BeginTextureMode(target);
-        ClearBackground(LIGHTGRAY);  // Clear render texture background color
+            ClearBackground(LIGHTGRAY);  // Clear render texture background color
 
-        DrawTextureEx(background_texture, (Vector2){(float)0, (float)0}, 0, 1, WHITE);
-        DrawTextureEx(player_texture, (Vector2){(float)player_x, (float)player_y}, 0, 2, WHITE);
-        if(IsWindowFullscreen()){
-            DrawText("WINDOW IS FULLSCREEN", 200, 40, 40, RED);
-        }
-        if(IsWindowMaximized()){
-            DrawText("WINDOW IS ''MAXIMIZED''", 200, 80, 40, RED);
-        }
-        DrawText(TextFormat( "CURRENT MONITOR: %i", GetCurrentMonitor()), 200, 0, 40, RED);
-        //DrawText(TextFormat( "X: %i \nY: %i", int(GetWindowPosition().x),int(GetWindowPosition().y)), 200, 200, 20, DARKGRAY);
-        DrawFPS(10,10);
-        DrawText(TextFormat( "FRAMETIME: %f", GetFrameTime() *1000), 10, 40, 20, LIME);
-        //draw_screen_center(); // make this toggle
-        draw_gamepads();
-        gamepad_disconnect_warning();
+            DrawTextureEx(background_texture, (Vector2){(float)0, (float)0}, 0, 1, WHITE);
+            DrawTextureEx(player_texture, (Vector2){(float)player.x, (float)player.y}, 0, 2, WHITE);
 
+
+            draw_debug_info();
+
+            DrawFPS(10,10);
         EndTextureMode();
 
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-        // Draw render texture to screen, properly scaled
-        DrawTexturePro(target.texture, (Rectangle){ 0.0f, 0.0f, (float)target.texture.width, (float)-target.texture.height },
-                   (Rectangle){(GetScreenWidth() - ((float)initial_window_width*scale_x))*0.5f, (GetScreenHeight() - ((float)initial_window_height*scale_y))*0.5f,
-                            (float)initial_window_width*scale_x, (float)initial_window_height*scale_y }, (Vector2){ 0, 0 }, 0.0f, WHITE);
-        EndDrawing();
+        draw_target_texture(target);
     }
 
     // De-Initialization -------------------------------------------------------------------
@@ -127,5 +77,3 @@ int main(void){
     CloseWindow();        // Close window and OpenGL context
     return 0;
 }
-
-
