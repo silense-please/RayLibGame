@@ -62,7 +62,7 @@ void gamepad_disconnect_warning(){
 
 
 // Draw all debugging text
-void draw_debug_info(){ // TODO make this toggle
+void draw_debug_info(){ //TODO make this toggle
     if(IsWindowFullscreen()){
         DrawText("WINDOW IS FULLSCREEN", 200, 40, 40, RED);
     }

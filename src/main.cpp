@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include "declaration.cpp"
+#include "load.cpp"
 #include "input.cpp"
 #include "draw.cpp"
 
@@ -17,10 +18,17 @@ int main(void){
 
     SetTargetFPS(120);
 
-    Texture2D player_texture = LoadTexture("Game_Data/player.png");
+    Texture2D player_texture = LoadTexture("Game_Data/player_64p.png");
     //Image player_image = LoadImage("Game_Data/wabbit_alpha.png");
     //Texture2D player_texture = LoadTextureFromImage(player_image);
     Texture2D background_texture = LoadTexture("Game_Data/background.png");
+    Texture2D ground_texture = LoadTexture("Game_Data/ground.png");
+
+    Player player;
+
+    //Load level (read txt file)
+    char level_0[level_x][level_y] = {};
+    load_level(level_0, player);
 
     InitAudioDevice();
     Music music = LoadMusicStream("Game_Data/nice_music.mp3");
@@ -31,9 +39,6 @@ int main(void){
     PlayMusicStream(music);
 
 
-    Player player;
-
-
     // Main game loop
     while (!WindowShouldClose()){
 
@@ -41,13 +46,10 @@ int main(void){
         window_height = GetScreenHeight();
         //UpdateMusicStream(music); // PLAY MUSIC
 
-        // Process Input -----------------------------------------------------------------------
-
+        // Process Input ----------------------------------------------------------------
         process_input(player);
 
-
         // Game Logic -------------------------------------------------------------------
-
 
 
         // Draw -------------------------------------------------------------------------
@@ -60,8 +62,15 @@ int main(void){
             DrawTextureEx(background_texture, (Vector2){(float)0, (float)0}, 0, 1, WHITE);
             DrawTextureEx(player_texture, (Vector2){(float)player.x, (float)player.y}, 0, 2, WHITE);
 
+            // static objects drawing - TODO make this a function
+            for (int x = 0; x < level_x; ++x) {
+                for (int y = 0; y < level_y; ++y) {
+                    if (level_0[x][y] == 'G')
+                        DrawTextureEx(ground_texture, (Vector2){(float)x*64, (float)y*64}, 0, 1, WHITE);
+                }
+            }
 
-            draw_debug_info();
+            //draw_debug_info(); // make this toggle
 
             DrawFPS(10,10);
         EndTextureMode();
@@ -73,6 +82,7 @@ int main(void){
     UnloadMusicStream(music);
     CloseAudioDevice();
     UnloadTexture(player_texture);
+    UnloadTexture(ground_texture);
     UnloadTexture(background_texture);
     CloseWindow();        // Close window and OpenGL context
     return 0;

@@ -22,6 +22,8 @@ struct Player{
     const float acceleration = 800.0f;
 };
 
+const int level_x = 20, level_y = 11; // Level dimensions in 64x64 grid
+
 //TODO declare all functions here
 //void process_input(Player& player);
 //void switch_active_gamepad();

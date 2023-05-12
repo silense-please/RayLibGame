@@ -8,28 +8,31 @@ window resizing - use render target texture - DONE
 screen scaling
 recreate everything from sfml template
 character control (inputs) - add input method choosing (gamepad 1, gamepad 2, keyboard?) and current detected gamepads
-
-
-IN PROGRESS
 divide code to funtions and structs(like: Playerstruct, draw_debugging_metrics, draw, toggle_fps_lock, ...)
 
 
-TODO - make test game
-
-objects render
+IN PROGRESS
 level editor (in txt for now)
-pause system
+
+
+TODO - make test game
+collisions and gravity
+camera - side-scrolling
+pause system (and UI)
 sound system
-make RPG-7 and collisions
-camera
-maybe make rez options (with buttons only for now)
-try different "scenes" or/and side-scrolling
+animation
+make RPG-7
+different game "scenes" - levels basically
+Texture loading and unloading system and characters' ids system to link them with texture
+Define and write down to txt all game(window) inputs
+refactor after "engine v1" done - sweep comments, restructure mb, fill declaration.cpp e.t.c
+
+try level editors - LDtk, Tiled
 try OpenGL integration
 try online sockets
-maybe build custom fps lock with sleep(sf::asMicroseconds) (or with chrono and thread)
-switch fps/frametime outputs with buttons
-Define and write down to txt all game(window) inputs
-Texture loading and unloading system
+try Box2D physics
+maybe make rez options (with buttons only for now)
+
 
 COMMIT THE GetCurrentMonitor() BUGFIX!!!
 
@@ -37,6 +40,7 @@ Problems:
     fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)
     Performance slowdown - might be a bottleneck(probably fine) - when on primary 1440p display in borderless mode
         - fps is dropping form ~2500 to ~1700, frametime from ~0,3-4ms to ~0,5ms, in motherloving ToggleFullscreen() it's rising up to 3000fps!
+        Found the cause - nvidia shadowplay! (it's switching to game window in borderless)- slowing ~33% performance (on high framerates) (only primary monitor)
     Initial resolution and aspect ratio is hardcoded - might need resize_texture2d
     Cursor is disappearing in borderless with discord or OBS - Well... what can I do?
     FPS Monitor (sometimes?) crashes SFML window upon closing FPS Monitor
