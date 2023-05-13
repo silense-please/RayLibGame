@@ -37,7 +37,6 @@ void toggle_borderless(){
 
 
 void toggle_fullscreen(){ // not finished - work in progress
-
     //this is fullscreen - works fine entering fullscreen but cant exit fullscreen, ToggleFullscreen works like shit
     // because refresh rate is not specified. Need to mess with RayLib functions(or add new) to make this work.
     // BUT this fullscreen does not stretches the content of the window
@@ -72,13 +71,13 @@ void switch_active_gamepad(){
     }
 }
 
-
+// All user input
 void process_input(Player& player){
     switch_active_gamepad();
     int scaled_mouse_x = GetMouseX() / scale_x;
     int scaled_mouse_y = GetMouseY() / scale_y;
 
-
+    if (IsKeyPressed(KEY_I)) _draw_debug_info = !_draw_debug_info;
     if (IsKeyPressed(KEY_L)) toggle_framelock();
     if (IsKeyPressed(KEY_F)) toggle_borderless();
     toggle_fullscreen(); // not finished

@@ -9,10 +9,10 @@ screen scaling
 recreate everything from sfml template
 character control (inputs) - add input method choosing (gamepad 1, gamepad 2, keyboard?) and current detected gamepads
 divide code to funtions and structs(like: Playerstruct, draw_debugging_metrics, draw, toggle_fps_lock, ...)
+level editor (in txt for now)
 
 
 IN PROGRESS
-level editor (in txt for now)
 
 
 TODO - make test game
@@ -42,6 +42,7 @@ Problems:
         - fps is dropping form ~2500 to ~1700, frametime from ~0,3-4ms to ~0,5ms, in motherloving ToggleFullscreen() it's rising up to 3000fps!
         Found the cause - nvidia shadowplay! (it's switching to game window in borderless)- slowing ~33% performance (on high framerates) (only primary monitor)
     Initial resolution and aspect ratio is hardcoded - might need resize_texture2d
+    Txt level dimensions are hardcoded
     Cursor is disappearing in borderless with discord or OBS - Well... what can I do?
     FPS Monitor (sometimes?) crashes SFML window upon closing FPS Monitor
 

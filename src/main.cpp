@@ -26,22 +26,21 @@ int main(void){
 
     Player player;
 
-    //Load level (read txt file)
-    char level_0[level_x][level_y] = {};
-    load_level(level_0, player);
+    Game_Level level_0;
+    load_level(level_0);
+    load_player_spawn(level_0, player);
 
     InitAudioDevice();
     Music music = LoadMusicStream("Game_Data/nice_music.mp3");
     music.looping = false;
     SetMusicPitch(music, 1.0);
     SetMusicVolume(music, 1);
-    SetMusicPan( music, 0.5);
+    SetMusicPan(music, 0.5);
     PlayMusicStream(music);
 
 
     // Main game loop
     while (!WindowShouldClose()){
-
         window_width = GetScreenWidth();
         window_height = GetScreenHeight();
         //UpdateMusicStream(music); // PLAY MUSIC
@@ -62,15 +61,8 @@ int main(void){
             DrawTextureEx(background_texture, (Vector2){(float)0, (float)0}, 0, 1, WHITE);
             DrawTextureEx(player_texture, (Vector2){(float)player.x, (float)player.y}, 0, 2, WHITE);
 
-            // static objects drawing - TODO make this a function
-            for (int x = 0; x < level_x; ++x) {
-                for (int y = 0; y < level_y; ++y) {
-                    if (level_0[x][y] == 'G')
-                        DrawTextureEx(ground_texture, (Vector2){(float)x*64, (float)y*64}, 0, 1, WHITE);
-                }
-            }
-
-            //draw_debug_info(); // make this toggle
+            static_objects_draw(level_0, ground_texture, 'G');
+            if (_draw_debug_info) draw_debug_info();
 
             DrawFPS(10,10);
         EndTextureMode();
@@ -85,5 +77,6 @@ int main(void){
     UnloadTexture(ground_texture);
     UnloadTexture(background_texture);
     CloseWindow();        // Close window and OpenGL context
+    printf("errors: %i", total_errors);
     return 0;
 }

@@ -2,6 +2,8 @@
 
 bool _is_borderless = false;
 bool _fps_lock = true;
+bool _draw_debug_info = false;
+int total_errors = 0;
 int window_width = 1280; // maybe '_' (internal) too
 int window_height = 720;
 //initial "source" screen resolution
@@ -22,7 +24,12 @@ struct Player{
     const float acceleration = 800.0f;
 };
 
-const int level_x = 20, level_y = 11; // Level dimensions in 64x64 grid
+struct Game_Level{
+    static const int x = 20; // Level dimensions in 64x64 grid
+    static const int y = 11;
+    char data[x][y] = {}; // matrix containing rectangular level grid (mb need to make this array dynamic later)
+};
+//const int level_x = 20, level_y = 11; // Level dimensions in 64x64 grid
 
 //TODO declare all functions here
 //void process_input(Player& player);

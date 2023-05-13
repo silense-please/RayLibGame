@@ -2,8 +2,8 @@
 //Apply window contents scaling
 void apply_screen_scale(){
     if(IsWindowResized()) {
-        scale_x = (float)GetScreenWidth() / initial_window_width ; // scales should be global i guess
-        scale_y = (float)GetScreenHeight() / initial_window_height ;
+        scale_x = (float)GetScreenWidth() / initial_window_width;
+        scale_y = (float)GetScreenHeight() / initial_window_height;
 
         //texture2d_resize(player_texture);// harder version of window resizing - not done - need to resize every texture - maybe overkill, not needed
     }
@@ -55,14 +55,19 @@ void draw_gamepads(){
 
 // Displays current gamepad dicsconnected warning
 void gamepad_disconnect_warning(){
-    if(!IsGamepadAvailable(active_gamepad)){
+    int count = 0;
+    for (int gamepad = 0; gamepad < max_gamepads; ++gamepad) {
+        if(IsGamepadAvailable(gamepad))
+            count++;
+    }
+    if((count > 0) && (!IsGamepadAvailable(active_gamepad))){
         DrawText("CURRENT GAMEPAD DISCONNECTED !!!", 50, 250, 60, RED);
     }
 }
 
 
 // Draw all debugging text
-void draw_debug_info(){ //TODO make this toggle
+void draw_debug_info(){
     if(IsWindowFullscreen()){
         DrawText("WINDOW IS FULLSCREEN", 200, 40, 40, RED);
     }
@@ -76,12 +81,23 @@ void draw_debug_info(){ //TODO make this toggle
     DrawText(TextFormat( "CURRENT MONITOR: %i", GetCurrentMonitor()), 200, 0, 40, RED);
     //DrawText(TextFormat( "X: %i \nY: %i", int(GetWindowPosition().x),int(GetWindowPosition().y)), 200, 200, 20, DARKGRAY);
     DrawText(TextFormat( "FRAMETIME: %f", GetFrameTime() *1000), 10, 40, 20, LIME);
-    //draw_screen_center(); // make this toggle
+    draw_screen_center(); // make this toggle
     draw_gamepads();
     gamepad_disconnect_warning();
 }
 
-// Draw resized target render texture on the screen
+
+void static_objects_draw(Game_Level &level, Texture2D &texture, char object_character){
+    for (int x = 0; x < level.x; ++x) {
+        for (int y = 0; y < level.y; ++y) {
+            if (level.data[x][y] == object_character)
+                DrawTextureEx(texture, (Vector2){(float)x*64, (float)y*64}, 0, 1, WHITE);
+        }
+    }
+}
+
+
+// Draw resized target render texture on the screen (Final draw)
 void draw_target_texture(RenderTexture2D& target){
     BeginDrawing();
     ClearBackground(RAYWHITE);
