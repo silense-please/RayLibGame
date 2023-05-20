@@ -2,10 +2,10 @@ GGGGGGGGGGGGGGGGGGGG
 G                  G
 G                  G
 G               GG G
-G          GGG    GG
-G                  G
 G                 GG
-G     P       GG   G
+G                  G
+G           GG    GG
+G     P            G
 G                  G
 GG    G           GG
 GGGGGGGGGGGGGGGGGGGG

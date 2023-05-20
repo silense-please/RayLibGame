@@ -8,7 +8,6 @@ void toggle_framelock(){
         SetTargetFPS(120);
     }
     _fps_lock = ! _fps_lock;
-
 }
 
 
