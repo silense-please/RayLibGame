@@ -88,8 +88,8 @@ void draw_debug_info(){
 
 
 void static_objects_draw(Game_Level level, Texture2D texture, char object_symbol){
-    for (int x = 0; x < level.x; ++x) {
-        for (int y = 0; y < level.y; ++y) {
+    for (int x = 0; x < level.width; ++x) {
+        for (int y = 0; y < level.height; ++y) {
             if (level.data[x][y] == object_symbol)
                 DrawTextureEx(texture, (Vector2){(float)x*64, (float)y*64}, 0, 1, WHITE);
         }

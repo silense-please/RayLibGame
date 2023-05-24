@@ -81,12 +81,16 @@ void process_input(Player& player){
     if (IsKeyPressed(KEY_F)) toggle_borderless();
     toggle_fullscreen(); // not finished
 
-    player.speed = GetFrameTime() * player.acceleration;
 
-    if (IsKeyDown(KEY_W) || IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_UP)){ player.y -= player.speed;}
-    if (IsKeyDown(KEY_S)|| IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_DOWN)){ player.y += player.speed;}
-    if (IsKeyDown(KEY_A)|| IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_LEFT)){ player.x -= player.speed;}
-    if (IsKeyDown(KEY_D)|| IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_RIGHT)){ player.x += player.speed;}
+    if (IsKeyDown(KEY_W) || IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_UP)){ player.acceleration_up = ACCELERATION;}
+    else{player.acceleration_up = 0;}
+    if (IsKeyDown(KEY_S) || IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_DOWN)){ player.acceleration_down = ACCELERATION;}
+    else{player.acceleration_down = 0;}
+    if (IsKeyDown(KEY_A) || IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_LEFT)){ player.acceleration_left = ACCELERATION;}
+    else{player.acceleration_left = 0;}
+    if (IsKeyDown(KEY_D) || IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_RIGHT)){ player.acceleration_right = ACCELERATION;}
+    else{player.acceleration_right = 0;}
+
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
         player.x = scaled_mouse_x;
         player.y = scaled_mouse_y;

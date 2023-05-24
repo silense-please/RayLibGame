@@ -28,7 +28,8 @@ Define and write down to txt all game(window) inputs
 refactor after "engine v1" done - sweep comments, restructure mb, fill declaration.cpp e.t.c
 compile release build and test it on VM and then on dimkanet's PC
 
-error handling
+define tile resolution (64 pixels) and refactor all "tile usages"
+error handling - try/catch
 write tests (unittests i guess)
 saves - game state (serialization?)
 unhardcode player inputs
@@ -39,11 +40,13 @@ try OpenGL integration
 try online sockets
 try Box2D physics
 maybe make rez options (with buttons only for now)
+refctor - maybe write corresponding declaration in it's modules - draw, load, e.t.c (to reduce coupling)
 
 
 COMMIT THE GetCurrentMonitor() BUGFIX!!!
 
 Problems:
+    Window crashes when audio output device is changed
     fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)
     Performance slowdown - might be a bottleneck(probably fine) - when on primary 1440p display in borderless mode
         - fps is dropping form ~2500 to ~1700, frametime from ~0,3-4ms to ~0,5ms, in motherloving ToggleFullscreen() it's rising up to 3000fps!
@@ -55,3 +58,4 @@ Problems:
 
 
 
+Don't be afraid to delete parts of code!

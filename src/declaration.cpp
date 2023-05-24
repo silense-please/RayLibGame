@@ -17,17 +17,23 @@ float scale_y = 1.0f;
 int active_gamepad = 0;
 const int max_gamepads = 4;// defined in raylib config - not hooking for some reason
 
+#define ACCELERATION 800.0
+
 struct Player{
     float x = 0;
     float y = 0;
-    float speed = 0;
-    const float acceleration = 800.0f;
+    float speed_x = 0;
+    float speed_y = 0;
+    float acceleration_left = 0;
+    float acceleration_right = 0;
+    float acceleration_up = 0;
+    float acceleration_down = 0;
 };
 
 struct Game_Level{
-    static const int x = 20; // Level dimensions in 64x64 grid
-    static const int y = 11;
-    char data[x][y] = {}; // matrix containing rectangular level grid (mb need to make this array dynamic later)
+    static const int width = 20; // Level dimensions in 64x64 grid
+    static const int height = 11;
+    char data[width][height] = {}; // matrix containing rectangular level grid (mb need to make this array dynamic later)
 };
 //const int level_x = 20, level_y = 11; // Level dimensions in 64x64 grid
 

@@ -35,7 +35,7 @@ void load_level(Game_Level &level){
         std::string line;
         int y = 0;
         while (std::getline(file_stream, line)) {
-            if (line.length() < level.x){ //if level length is smaller than specified, string '[]' operator has undefined behavior
+            if (line.length() < level.width){ //if level length is smaller than specified, string '[]' operator has undefined behavior
                 printf("!!!ERROR: Level loading failed, string length is incorrect\n");
                 total_errors++;
                 //break; //TODO make this a proper exeption
@@ -51,8 +51,8 @@ void load_level(Game_Level &level){
 
 //Load player spawnpoint in the level if specified
 void load_player_spawn(Game_Level &level, Player &player){
-    for (int x = 0; x < level.x; ++x) {
-        for (int y = 0; y < level.y; ++y) {
+    for (int x = 0; x < level.width; ++x) {
+        for (int y = 0; y < level.height; ++y) {
             if (level.data[x][y] == 'P') {
                 player.x = x * 64;
                 player.y = y * 64;

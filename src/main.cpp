@@ -2,6 +2,7 @@
 #include "declaration.cpp"
 #include "load.cpp"
 #include "input.cpp"
+#include "collision.cpp"
 #include "draw.cpp"
 
 int main(void){
@@ -50,20 +51,26 @@ int main(void){
 
         // Game Logic -------------------------------------------------------------------
 
+        player.speed_x = GetFrameTime() * (player.acceleration_right - player.acceleration_left);
+        player.speed_y = GetFrameTime() * (player.acceleration_down - player.acceleration_up);
 
+        player.x += player.speed_x;
+        player.y += player.speed_y;
 
+        level_borders_collision(player);
         // Draw -------------------------------------------------------------------------
         apply_screen_scale();
-
         // Draw everything in the render texture, note this will not be rendered on screen, yet
         BeginTextureMode(target);
             ClearBackground(LIGHTGRAY);  // Clear render texture background color
 
             DrawTextureEx(background_texture, (Vector2){(float)0, (float)0}, 0, 1, WHITE);
-            DrawTextureEx(player_texture, (Vector2){(float)player.x, (float)player.y}, 0, 2, WHITE);
+            DrawTextureEx(player_texture, (Vector2){(float)player.x, (float)player.y}, 0, 1, WHITE);
 
             static_objects_draw(level_0, ground_texture, 'G');
             if (_draw_debug_info) draw_debug_info();
+
+            detect_collision(player, level_0); //@Temporary - maybe move to draw_debug_info after collision system is finished
 
             DrawFPS(10,10);
         EndTextureMode();
@@ -78,6 +85,6 @@ int main(void){
     UnloadTexture(ground_texture);
     UnloadTexture(background_texture);
     CloseWindow();        // Close window and OpenGL context
-    printf("errors: %i", total_errors);
+    printf("Errors: %i", total_errors);
     return 0;
 }
