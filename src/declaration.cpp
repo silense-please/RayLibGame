@@ -1,4 +1,6 @@
 // Global variables (use 'extern' if breaks)
+#define TARGET_FPS 120
+#define TILESIZE 64
 
 bool _is_borderless = false;
 bool _fps_lock = true;
@@ -17,12 +19,14 @@ float scale_y = 1.0f;
 int active_gamepad = 0;
 const int max_gamepads = 4;// defined in raylib config - not hooking for some reason
 
-#define ACCELERATION 800.0
+#define ACCELERATION 600.0
 
 struct Player{
     float x = 0;
     float y = 0;
-    float speed_x = 0;
+    float width = 64;
+    float height = 64;
+    float speed_x = 0; //speed is the distance(step) player steps every frame
     float speed_y = 0;
     float acceleration_left = 0;
     float acceleration_right = 0;

@@ -1788,8 +1788,7 @@ int GetCurrentMonitor(void)
                 monitor = monitors[i];
                 glfwGetMonitorWorkarea(monitor, &mx, &my, &width, &height);
 
-                //if (x >= mx && x <= (mx + width) && y >= my && y <= (my + height)) //this has bug
-                if (x >= mx && x < (mx + width) && y >= my && y < (my + height)) // fixed - deleted '=' in two places
+                if (x >= mx && x < (mx + width) && y >= my && y < (my + height))
                 {
                     index = i;
                     break;

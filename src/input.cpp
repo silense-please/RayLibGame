@@ -5,7 +5,7 @@ void toggle_framelock(){
         SetTargetFPS(0);
     }
     else{
-        SetTargetFPS(120);
+        SetTargetFPS(TARGET_FPS);
     }
     _fps_lock = ! _fps_lock;
 }
@@ -31,7 +31,7 @@ void toggle_borderless(){
         SetWindowPosition(int(monitor_position.x),int(monitor_position.y));
         SetWindowSize(GetMonitorWidth(GetCurrentMonitor()),GetMonitorHeight(GetCurrentMonitor())); // this MUST be positive parameters
     }
-    _is_borderless = !_is_borderless;
+    _is_borderless = ! _is_borderless;
 }
 
 

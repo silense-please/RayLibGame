@@ -14,10 +14,9 @@ int main(void){
     // Render texture initialization, used to hold the rendering result so we can easily resize it
     RenderTexture2D target = LoadRenderTexture(window_width, window_height);
 
-    //not needed?
-    //SetTextureFilter(target.texture, TEXTURE_FILTER_ANISOTROPIC_16X);  // Texture scale filter to use
+    //SetTextureFilter(target.texture, TEXTURE_FILTER_ANISOTROPIC_16X); //not needed?
 
-    SetTargetFPS(120);
+    SetTargetFPS(TARGET_FPS);
 
     Texture2D player_texture = LoadTexture("Game_Data/player_64p.png");
     //Image player_image = LoadImage("Game_Data/wabbit_alpha.png");
@@ -27,9 +26,9 @@ int main(void){
 
     Player player;
 
-    Game_Level level_0;
-    load_level(level_0);
-    load_player_spawn(level_0, player);
+    Game_Level current_level;
+    load_level(current_level);
+    load_player_spawn(current_level, player);
 
     InitAudioDevice();
     Music music = LoadMusicStream("Game_Data/nice_music.mp3");
@@ -53,6 +52,7 @@ int main(void){
 
         player.speed_x = GetFrameTime() * (player.acceleration_right - player.acceleration_left);
         player.speed_y = GetFrameTime() * (player.acceleration_down - player.acceleration_up);
+        ground_collision(player, current_level);
 
         player.x += player.speed_x;
         player.y += player.speed_y;
@@ -67,10 +67,10 @@ int main(void){
             DrawTextureEx(background_texture, (Vector2){(float)0, (float)0}, 0, 1, WHITE);
             DrawTextureEx(player_texture, (Vector2){(float)player.x, (float)player.y}, 0, 1, WHITE);
 
-            static_objects_draw(level_0, ground_texture, 'G');
+            static_objects_draw(current_level, ground_texture, 'G');
             if (_draw_debug_info) draw_debug_info();
 
-            detect_collision(player, level_0); //@Temporary - maybe move to draw_debug_info after collision system is finished
+            detect_collision(player, current_level); //@Temporary - maybe move to draw_debug_info after collision system is finished
 
             DrawFPS(10,10);
         EndTextureMode();
