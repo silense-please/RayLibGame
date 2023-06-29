@@ -82,10 +82,12 @@ void process_input(Player& player){
     toggle_fullscreen(); // not finished
 
 
-    if (IsKeyDown(KEY_W) || IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_UP)){ player.acceleration_up = ACCELERATION;}
+    if (IsKeyPressed(KEY_W) || IsGamepadButtonPressed(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_UP)){
+        if(player.is_standing && player.speed_y == 0){
+            player.acceleration_up = GRAVITATION * 500;
+        }
+    }
     else{player.acceleration_up = 0;}
-    if (IsKeyDown(KEY_S) || IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_DOWN)){ player.acceleration_down = ACCELERATION;}
-    else{player.acceleration_down = 0;}
     if (IsKeyDown(KEY_A) || IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_LEFT)){ player.acceleration_left = ACCELERATION;}
     else{player.acceleration_left = 0;}
     if (IsKeyDown(KEY_D) || IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_RIGHT)){ player.acceleration_right = ACCELERATION;}
@@ -94,6 +96,9 @@ void process_input(Player& player){
     if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
         player.x = scaled_mouse_x;
         player.y = scaled_mouse_y;
+        player.is_floating = true;
     }
+    if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+        player.is_floating = false;
 }
 

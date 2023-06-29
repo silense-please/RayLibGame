@@ -19,10 +19,12 @@ void level_borders_collision(Player &player) {
     if(player.x < 0) player.x = 0;
 }
 
-void ground_collision(Player &player, Game_Level level) {
-    for (int x = 0; x < level.width; ++x ) {
+void static_object_collision(Player &player, Game_Level level) {
+    player.is_standing = false;
+    for (int x = 0; x < level.width; ++x) {
         for (int y = 0; y < level.height; ++y) {
             if (level.data[x][y] == 'G') {
+                bool stuck_up = 0, stuck_down = 0, stuck_left = 0, stuck_right = 0;
                 // Down collision
                 if (CheckCollisionRecs((Rectangle){player.x, player.y + TILESIZE, player.width, player.height}, (Rectangle){(float)x*TILESIZE, (float)y*TILESIZE, TILESIZE, TILESIZE})){
                     if(!CheckCollisionRecs((Rectangle){player.x, player.y, player.width, player.height}, (Rectangle){(float)x*TILESIZE, (float)y*TILESIZE, TILESIZE, TILESIZE})){
@@ -30,7 +32,7 @@ void ground_collision(Player &player, Game_Level level) {
                             player.speed_y = y*TILESIZE - (player.y + TILESIZE);
                     }
                     else
-                        player.speed_y = -0.2 * GetFrameTime() * ACCELERATION; //to push out if stuck (actually this is suppoused to be an error cause player shouldn't be stuck in collided objects)
+                        stuck_down = 1; //to push out if stuck (actually this is suppoused to be an error cause player shouldn't be stuck in collided objects)
                 }
                 //Up collision
                 if (CheckCollisionRecs((Rectangle){player.x, player.y - TILESIZE, player.width, player.height}, (Rectangle){(float)x*TILESIZE, (float)y*TILESIZE, TILESIZE, TILESIZE})){
@@ -39,7 +41,7 @@ void ground_collision(Player &player, Game_Level level) {
                             player.speed_y = -(player.y - (y*TILESIZE + TILESIZE));
                     }
                     else
-                        player.speed_y = 0.2 * GetFrameTime() * ACCELERATION; //to push out if stuck
+                        stuck_up = 1;
                 }
                 //Right collision
                 if (CheckCollisionRecs((Rectangle){player.x+ TILESIZE, player.y, player.width, player.height}, (Rectangle){(float)x*TILESIZE, (float)y*TILESIZE, TILESIZE, TILESIZE})){
@@ -48,7 +50,7 @@ void ground_collision(Player &player, Game_Level level) {
                             player.speed_x = x*TILESIZE - (player.x + TILESIZE);
                     }
                     else
-                        player.speed_x = -0.2 * GetFrameTime() * ACCELERATION; //to push out if stuck
+                        stuck_right = 1;
                 }
                 //Left collision
                 if (CheckCollisionRecs((Rectangle){player.x - TILESIZE, player.y, player.width, player.height}, (Rectangle){(float)x*TILESIZE, (float)y*TILESIZE, TILESIZE, TILESIZE})){
@@ -57,7 +59,17 @@ void ground_collision(Player &player, Game_Level level) {
                             player.speed_x = -(player.x - (x*TILESIZE + TILESIZE));
                     }
                     else
-                        player.speed_x = 0.2 * GetFrameTime() * ACCELERATION; //to push out if stuck
+                        stuck_left = 1; //to push out if stuck
+                }
+                //If player is stuck inside collision
+                if(stuck_up || stuck_down || stuck_left || stuck_right){
+                    player.speed_y = (stuck_up - stuck_down) * 0.2 * GetFrameTime() * ACCELERATION;
+                    player.speed_x = (stuck_left - stuck_right) * 0.2 * GetFrameTime() * ACCELERATION;
+                }
+                //Check if player is standing on the ground
+                if(player.y + TILESIZE == y*TILESIZE){
+                    player.is_standing = true;
+                    player.falling_time = INITIAL_FALLING_TIME;
                 }
 
             }

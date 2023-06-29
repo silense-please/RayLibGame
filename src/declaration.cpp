@@ -20,6 +20,9 @@ int active_gamepad = 0;
 const int max_gamepads = 4;// defined in raylib config - not hooking for some reason
 
 #define ACCELERATION 600.0
+#define GRAVITATION 2000.0
+#define INITIAL_FALLING_TIME 0.01 // initial acceleration time of free fall - for faster falling
+
 
 struct Player{
     float x = 0;
@@ -32,6 +35,10 @@ struct Player{
     float acceleration_right = 0;
     float acceleration_up = 0;
     float acceleration_down = 0;
+    bool is_standing = false;
+    bool is_floating = false; //levitating - for now only happens when dragging player by mouse "in debug mode"
+
+    float falling_time = 0;
 };
 
 struct Game_Level{

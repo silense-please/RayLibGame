@@ -50,9 +50,13 @@ int main(void){
 
         // Game Logic -------------------------------------------------------------------
 
+        if(!player.is_standing && !player.is_floating && player.speed_y > 0){
+            player.falling_time += GetFrameTime();
+        }
+
         player.speed_x = GetFrameTime() * (player.acceleration_right - player.acceleration_left);
-        player.speed_y = GetFrameTime() * (player.acceleration_down - player.acceleration_up);
-        ground_collision(player, current_level);
+        player.speed_y = player.falling_time * (GRAVITATION - player.acceleration_up) * GetFrameTime();
+        static_object_collision(player, current_level);
 
         player.x += player.speed_x;
         player.y += player.speed_y;
@@ -70,7 +74,12 @@ int main(void){
             static_objects_draw(current_level, ground_texture, 'G');
             if (_draw_debug_info) draw_debug_info();
 
+            //@Temporary - move to draw debug info
+            DrawText(TextFormat( "standing: %d", player.is_standing), 10, 40, 20, LIME);
+            DrawText(TextFormat( "floating: %d", player.is_floating), 10, 120, 20, LIME);
+            DrawText(TextFormat( "falling_time: %f ", player.falling_time), 10, 80, 20, LIME);
             detect_collision(player, current_level); //@Temporary - maybe move to draw_debug_info after collision system is finished
+            // -------------
 
             DrawFPS(10,10);
         EndTextureMode();
