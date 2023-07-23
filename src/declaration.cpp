@@ -2,6 +2,7 @@
 #define TARGET_FPS 120
 #define TILESIZE 64
 
+//Pre-underscore-d values are internal config flags(states) - modify them cautiously
 bool _is_borderless = false;
 bool _fps_lock = true;
 bool _draw_debug_info = false;
@@ -21,7 +22,7 @@ const int max_gamepads = 4;// defined in raylib config - not hooking for some re
 
 #define ACCELERATION 600.0
 #define GRAVITATION 2000.0
-#define INITIAL_FALLING_TIME 0.01 // initial acceleration time of free fall - for faster falling
+#define INITIAL_FALLING_TIME 0.001 // initial acceleration time of free fall - for faster falling
 
 
 struct Player{
@@ -36,7 +37,7 @@ struct Player{
     float acceleration_up = 0;
     float acceleration_down = 0;
     bool is_standing = false;
-    bool is_floating = false; //levitating - for now only happens when dragging player by mouse "in debug mode"
+    bool is_levitating = false; //for now only happens when dragging player with mouse "in debug mode"
 
     float falling_time = 0;
 };

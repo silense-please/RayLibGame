@@ -17,6 +17,7 @@ IN PROGRESS
 make good jumps
 https://www.youtube.com/watch?v=Mo1-sKYbks0
 https://www.youtube.com/watch?v=7KiK0Aqtmzc&t=216s
+check out raylib template platformer
 
 TODO - make test game (engine demo)
 pause system (and UI)
@@ -25,7 +26,8 @@ sound system
 animation
 make RPG-7
 
-Big input refactor - key presses in input section result actions, which are then prosecced in game logic
+Big input refactor - key presses in input section result actions, which are then processed in game logic
+    (какая то структура данных(enum?) со всеми actions)
 Define and write down to txt all game(window) inputs
 refactor after "engine v1" done - sweep comments, restructure, fill declaration.cpp, make "debug" and release game mode e.t.c
 compile release build and test it on VM and then on dimkanet's PC

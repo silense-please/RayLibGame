@@ -1,5 +1,6 @@
 #include "raylib.h"
 #include "declaration.cpp"
+#include "settings.cpp"
 #include "load.cpp"
 #include "input.cpp"
 #include "collision.cpp"
@@ -13,8 +14,6 @@ int main(void){
 
     // Render texture initialization, used to hold the rendering result so we can easily resize it
     RenderTexture2D target = LoadRenderTexture(window_width, window_height);
-
-    //SetTextureFilter(target.texture, TEXTURE_FILTER_ANISOTROPIC_16X); //not needed?
 
     SetTargetFPS(TARGET_FPS);
 
@@ -41,8 +40,6 @@ int main(void){
 
     // Main game loop
     while (!WindowShouldClose()){
-        window_width = GetScreenWidth();
-        window_height = GetScreenHeight();
         //UpdateMusicStream(music); // PLAY MUSIC
 
         // Process Input ----------------------------------------------------------------
@@ -50,12 +47,12 @@ int main(void){
 
         // Game Logic -------------------------------------------------------------------
 
-        if(!player.is_standing && !player.is_floating && player.speed_y > 0){
+        if(!player.is_standing && !player.is_levitating && player.speed_y > 0){
             player.falling_time += GetFrameTime();
         }
 
         player.speed_x = GetFrameTime() * (player.acceleration_right - player.acceleration_left);
-        player.speed_y = player.falling_time * (GRAVITATION - player.acceleration_up) * GetFrameTime();
+        player.speed_y = player.falling_time * (GRAVITATION - player.acceleration_up) * GetFrameTime(); // @Херня - переделывай
         static_object_collision(player, current_level);
 
         player.x += player.speed_x;
@@ -64,7 +61,7 @@ int main(void){
         level_borders_collision(player);
         // Draw -------------------------------------------------------------------------
         apply_screen_scale();
-        // Draw everything in the render texture, note this will not be rendered on screen, yet
+        // This needs to be a big draw function
         BeginTextureMode(target);
             ClearBackground(LIGHTGRAY);  // Clear render texture background color
 
@@ -76,7 +73,7 @@ int main(void){
 
             //@Temporary - move to draw debug info
             DrawText(TextFormat( "standing: %d", player.is_standing), 10, 40, 20, LIME);
-            DrawText(TextFormat( "floating: %d", player.is_floating), 10, 120, 20, LIME);
+            DrawText(TextFormat( "floating: %d", player.is_levitating), 10, 120, 20, LIME);
             DrawText(TextFormat( "falling_time: %f ", player.falling_time), 10, 80, 20, LIME);
             detect_collision(player, current_level); //@Temporary - maybe move to draw_debug_info after collision system is finished
             // -------------

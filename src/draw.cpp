@@ -1,4 +1,3 @@
-
 //Apply window contents scaling
 void apply_screen_scale(){
     if(IsWindowResized()) {
@@ -8,7 +7,6 @@ void apply_screen_scale(){
         //texture2d_resize(player_texture);// harder version of window resizing - not done - need to resize every texture - maybe overkill, not needed
     }
 }
-
 
 //Hard texture resize
 void texture2d_resize(Texture2D& texture){
@@ -28,16 +26,11 @@ void texture2d_resize(Texture2D& texture){
 
 }
 
-
-
-
-
 // Crosshair in the center of screen demonstrating current window moonitor
 void draw_screen_center(){
     DrawRectangle(initial_window_width / 2 - 2, initial_window_height / 2 - 35, 5, 70, RED);
     DrawRectangle(initial_window_width / 2 - 35, initial_window_height / 2 - 2, 70, 5, RED);
 }
-
 
 // Draw current connected gamepads (for debugging)
 void draw_gamepads(){
@@ -51,7 +44,6 @@ void draw_gamepads(){
     }
     DrawText(TextFormat("CURRENT GAMEPAD: %d", active_gamepad + 1), 700, 160, 30, BLACK);
 }
-
 
 // Displays current gamepad dicsconnected warning
 void gamepad_disconnect_warning(){

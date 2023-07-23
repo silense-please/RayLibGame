@@ -25,7 +25,6 @@ void load_level_dimensions(int &x, int &y){
 // Load level from txt file to char matrix
 void load_level(Game_Level &level){
     std::ifstream file_stream("Game_Data/level_0.txt", std::ios::in);
-
     //load_level_dimensions(level_x, level_y);
 
     if(!file_stream.is_open()){
