@@ -1,3 +1,5 @@
+#include <iostream>
+
 // Global variables (use 'extern' if breaks)
 #define TARGET_FPS 120
 #define TILESIZE 64
@@ -18,12 +20,18 @@ float scale_x = 1.0f;
 float scale_y = 1.0f;
 
 int active_gamepad = 0;
-const int max_gamepads = 4;// defined in raylib config - not hooking for some reason
+const int max_gamepads = 4;//@Unresolved - defined in raylib config - not hooking for some reason
+
+
 
 #define ACCELERATION 600.0
 #define GRAVITATION 2000.0
 #define INITIAL_FALLING_TIME 0.001 // initial acceleration time of free fall - for faster falling
 
+
+//#define BUTTON_TOGGLE_BORDERLESS KEY_F || GAMEPAD_BUTTON_LEFT_FACE_LEFT || MOUSE_BUTTON_MIDDLE
+#define MAX_BUTTON_BINDINGS 5
+std::string BUTTON_TOGGLE_BORDERLESS[MAX_BUTTON_BINDINGS]  {"KEY_F", "MOUSE_BUTTON_MIDDLE", "KEY_A","GAMEPAD_BUTTON_LEFT_FACE_LEFT", "GAMEPAD_BUTTON_RIGHT_FACE_LEFT"};
 
 struct Player{
     float x = 0;
@@ -43,11 +51,10 @@ struct Player{
 };
 
 struct Game_Level{
-    static const int width = 20; // Level dimensions in 64x64 grid
+    static const int width = 20; // Level dimensions in 64x64 grid @Unfinished - Needs to be loaded by load level dimensions func
     static const int height = 11;
     char data[width][height] = {}; // matrix containing rectangular level grid (mb need to make this array dynamic later)
 };
-//const int level_x = 20, level_y = 11; // Level dimensions in 64x64 grid
 
 //TODO declare all functions here
 //void process_input(Player& player);

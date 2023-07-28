@@ -52,6 +52,7 @@ refctor - maybe write corresponding declaration in it's modules - draw, load, e.
 
 Problems:
     Window crashes when audio output device is changed
+    Audio system is broken - on 1500+ fps game there is a small digital noise regardless of volume, even if muted - WTF
     fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)
     Performance slowdown - might be a bottleneck(probably fine) - when on primary 1440p display in borderless mode
         - fps is dropping form ~2500 to ~1700, frametime from ~0,3-4ms to ~0,5ms, in motherloving ToggleFullscreen() it's rising up to 3000fps!

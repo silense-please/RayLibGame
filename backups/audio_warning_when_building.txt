@@ -1,0 +1,25 @@
+====================[ Build | RayLibGame | Debug ]==============================
+"D:\Program Files\JetBrains\CLion 2022.3.2\bin\cmake\win\x64\bin\cmake.exe" --build D:\!!!Projects\CPP\RayLibGame\cmake-build-debug --target RayLibGame -j 9
+[1/10] Building CXX object CMakeFiles/RayLibGame.dir/src/main.cpp.obj
+[2/10] Building C object raylib/raylib/CMakeFiles/raylib.dir/utils.c.obj
+[3/10] Building C object raylib/raylib/CMakeFiles/raylib.dir/rshapes.c.obj
+[4/10] Building C object raylib/raylib/CMakeFiles/raylib.dir/rtext.c.obj
+[5/10] Building C object raylib/raylib/CMakeFiles/raylib.dir/rtextures.c.obj
+[6/10] Building C object raylib/raylib/CMakeFiles/raylib.dir/rcore.c.obj
+[7/10] Building C object raylib/raylib/CMakeFiles/raylib.dir/rmodels.c.obj
+[8/10] Building C object raylib/raylib/CMakeFiles/raylib.dir/raudio.c.obj
+D:/!!!Projects/CPP/RayLibGame/raylib/src/raudio.c: In function 'LoadMusicStream':
+D:/!!!Projects/CPP/RayLibGame/raylib/src/raudio.c:1290:45: warning: passing argument 1 of 'qoaplay_open' discards 'const' qualifier from pointer target type [-Wdiscarded-qualifiers]
+         qoaplay_desc *ctxQoa = qoaplay_open(fileName);
+                                             ^~~~~~~~
+In file included from D:/!!!Projects/CPP/RayLibGame/raylib/src/raudio.c:233:0:
+D:/!!!Projects/CPP/RayLibGame/raylib/src/external/qoaplay.c:86:15: note: expected 'char *' but argument is of type 'const char *'
+ qoaplay_desc *qoaplay_open(char *path)
+               ^~~~~~~~~~~~
+[9/10] Linking C static library raylib\raylib\libraylib.a
+[10/10] Linking CXX executable RayLibGame.exe
+
+Build finished
+
+
+// might be connected to audio issues(Problems) described in TODO

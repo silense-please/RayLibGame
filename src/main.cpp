@@ -29,13 +29,10 @@ int main(void){
     load_level(current_level);
     load_player_spawn(current_level, player);
 
-    InitAudioDevice();
-    Music music = LoadMusicStream("Game_Data/nice_music.mp3");
-    music.looping = false;
-    SetMusicPitch(music, 1.0);
-    SetMusicVolume(music, 1);
-    SetMusicPan(music, 0.5);
-    PlayMusicStream(music);
+//    InitAudioDevice();
+//    Music music = LoadMusicStream("Game_Data/nice_music.mp3");
+//    music.looping = false;
+//    PlayMusicStream(music);
 
 
     // Main game loop
@@ -85,8 +82,8 @@ int main(void){
     }
 
     // De-Initialization -------------------------------------------------------------------
-    UnloadMusicStream(music);
-    CloseAudioDevice();
+    //UnloadMusicStream(music);
+    //CloseAudioDevice();
     UnloadTexture(player_texture);
     UnloadTexture(ground_texture);
     UnloadTexture(background_texture);
