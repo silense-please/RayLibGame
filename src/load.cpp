@@ -31,7 +31,7 @@ void load_level(Game_Level &level){
         printf("Failed to open the file!!!\n!!!\n");
     }
     else{
-        std::string line;
+        string line;
         int y = 0;
         while (std::getline(file_stream, line)) {
             if (line.length() < level.width){ //if level length is smaller than specified, string '[]' operator has undefined behavior

@@ -1,4 +1,8 @@
+// @ sign - tags & reminders to cleanup\change the code later
+
+
 #include <iostream>
+using std::string;
 
 // Global variables (use 'extern' if breaks)
 #define TARGET_FPS 120
@@ -29,9 +33,18 @@ const int max_gamepads = 4;//@Unresolved - defined in raylib config - not hookin
 #define INITIAL_FALLING_TIME 0.001 // initial acceleration time of free fall - for faster falling
 
 
-//#define BUTTON_TOGGLE_BORDERLESS KEY_F || GAMEPAD_BUTTON_LEFT_FACE_LEFT || MOUSE_BUTTON_MIDDLE
+//Input bindings - be wary of same key duplicating to multiple buttons
 #define MAX_BUTTON_BINDINGS 5
-std::string BUTTON_TOGGLE_BORDERLESS[MAX_BUTTON_BINDINGS]  {"KEY_F", "MOUSE_BUTTON_MIDDLE", "KEY_A","GAMEPAD_BUTTON_LEFT_FACE_LEFT", "GAMEPAD_BUTTON_RIGHT_FACE_LEFT"};
+string BUTTON_TOGGLE_BORDERLESS[MAX_BUTTON_BINDINGS]  {"KEY_F", "MOUSE_BUTTON_MIDDLE","GAMEPAD_BUTTON_RIGHT_FACE_LEFT"};
+string BUTTON_DEBUG_INFO[MAX_BUTTON_BINDINGS]  {"KEY_I"};
+string BUTTON_FRAMELOCK[MAX_BUTTON_BINDINGS]  {"KEY_L"};
+
+string BUTTON_LMB[MAX_BUTTON_BINDINGS]  {"MOUSE_BUTTON_LEFT"};
+
+string BUTTON_MOVE_RIGHT[MAX_BUTTON_BINDINGS]  {"KEY_D", "KEY_RIGHT", "GAMEPAD_BUTTON_LEFT_FACE_RIGHT"};
+string BUTTON_MOVE_LEFT[MAX_BUTTON_BINDINGS]  {"KEY_A", "KEY_LEFT","GAMEPAD_BUTTON_LEFT_FACE_LEFT"};
+string BUTTON_JUMP[MAX_BUTTON_BINDINGS]  {"KEY_SPACE", "GAMEPAD_BUTTON_RIGHT_FACE_DOWN"};
+
 
 struct Player{
     float x = 0;

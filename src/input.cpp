@@ -116,7 +116,7 @@ int keyboard_key_int[] = {
 };
 
 
-std::string keyboard_key_str[] ={
+string keyboard_key_str[] ={
         "KEY_NULL"            ,        // Key: NULL, used for no key pressed
         // Alphanumeric keys
         "KEY_APOSTROPHE"      ,       // Key: '
@@ -256,7 +256,7 @@ int gamepad_button_int[] ={
 };
 
 
-std::string gamepad_button_str[] ={
+string gamepad_button_str[] ={
         "GAMEPAD_BUTTON_UNKNOWN",         // Unknown button, just for error checking
         "GAMEPAD_BUTTON_LEFT_FACE_UP",        // Gamepad left DPAD up button
         "GAMEPAD_BUTTON_LEFT_FACE_RIGHT",     // Gamepad left DPAD right button
@@ -289,7 +289,7 @@ int mouse_button_int[] ={
 };
 
 
-std::string mouse_button_str[] ={
+string mouse_button_str[] ={
         "MOUSE_BUTTON_LEFT",       // Mouse button left
         "MOUSE_BUTTON_RIGHT",       // Mouse button right
         "MOUSE_BUTTON_MIDDLE",       // Mouse button middle (pressed wheel)
@@ -299,26 +299,56 @@ std::string mouse_button_str[] ={
         "MOUSE_BUTTON_BACK",
 };
 
+enum {
+    PRESSED,
+    RELEASED,
+    DOWN,
+    UP
+};
 
-bool IsButtonPressed(std::string buttons[MAX_BUTTON_BINDINGS]){
+bool process_button_input(string buttons[MAX_BUTTON_BINDINGS], int action){
     bool passed = false;
     for (int binding = 0; binding < MAX_BUTTON_BINDINGS; ++binding) {
         if (buttons[binding][0] == 'K') { //KEY_ ...
             for (int index = 0; index < sizeof(keyboard_key_str) / sizeof(*keyboard_key_str); ++index) {
-                if (keyboard_key_str[index] == buttons[binding] && IsKeyPressed(keyboard_key_int[index]))
-                    passed = true;
-            }
-        }
-        if (buttons[binding][0] == 'G') { // GAMEPAD_BUTTON_ ...
-            for (int index = 0; index < sizeof(gamepad_button_str) / sizeof(*gamepad_button_str); ++index) {
-                if (gamepad_button_str[index] == buttons[binding] && IsGamepadButtonPressed(active_gamepad, gamepad_button_int[index]))
-                    passed = true;
+                if (keyboard_key_str[index] == buttons[binding]){
+                    if      (action == PRESSED && IsKeyPressed(keyboard_key_int[index]))
+                        passed = true;
+                    else if (action == RELEASED && IsKeyReleased(keyboard_key_int[index]))
+                        passed = true;
+                    else if (action == DOWN && IsKeyDown(keyboard_key_int[index]))
+                        passed = true;
+                    else if (action == UP && IsKeyUp(keyboard_key_int[index]))
+                        passed = true;
+                }
             }
         }
         if (buttons[binding][0] == 'M') { // MOUSE_BUTTON_ ...
             for (int index = 0; index < sizeof(mouse_button_str) / sizeof(*mouse_button_str); ++index) {
-                if (mouse_button_str[index] == buttons[binding] && IsMouseButtonPressed(mouse_button_int[index]))
-                    passed = true;
+                if (mouse_button_str[index] == buttons[binding]){
+                    if      (action == PRESSED && IsMouseButtonPressed(mouse_button_int[index]))
+                        passed = true;
+                    else if (action == RELEASED && IsMouseButtonReleased(mouse_button_int[index]))
+                        passed = true;
+                    else if (action == DOWN && IsMouseButtonDown(mouse_button_int[index]))
+                        passed = true;
+                    else if (action == UP && IsMouseButtonUp(mouse_button_int[index]))
+                        passed = true;
+                }
+            }
+        }
+        if (buttons[binding][0] == 'G') { // GAMEPAD_BUTTON_ ...
+            for (int index = 0; index < sizeof(gamepad_button_str) / sizeof(*gamepad_button_str); ++index) {
+                if (gamepad_button_str[index] == buttons[binding]){
+                    if      (action == PRESSED && IsGamepadButtonPressed(active_gamepad, gamepad_button_int[index]))
+                        passed = true;
+                    else if (action == RELEASED && IsGamepadButtonReleased(active_gamepad, gamepad_button_int[index]))
+                        passed = true;
+                    else if (action == DOWN && IsGamepadButtonDown(active_gamepad, gamepad_button_int[index]))
+                        passed = true;
+                    else if (action == UP && IsGamepadButtonUp(active_gamepad, gamepad_button_int[index]))
+                        passed = true;
+                }
             }
         }
     }
@@ -326,8 +356,21 @@ bool IsButtonPressed(std::string buttons[MAX_BUTTON_BINDINGS]){
 }
 
 
+bool IsButtonPressed(string buttons[MAX_BUTTON_BINDINGS]){
+    return process_button_input(buttons, PRESSED);
+}
+bool IsButtonReleased(string buttons[MAX_BUTTON_BINDINGS]){
+    return process_button_input(buttons, RELEASED);
+}
+bool IsButtonDown(string buttons[MAX_BUTTON_BINDINGS]){
+    return process_button_input(buttons, DOWN);
+}
+bool IsButtonUp(string buttons[MAX_BUTTON_BINDINGS]){
+    return process_button_input(buttons, UP);
+}
+
 // Switch active used gamepad from 1 up to 4
-void switch_active_gamepad(){
+void switch_active_gamepad(){  //@Hardcoded - should be options menu switch
     if (IsKeyPressed(KEY_ONE) && (IsKeyDown(KEY_G))){
         active_gamepad = 0;
     }
@@ -348,31 +391,30 @@ void process_input(Player& player){
     int scaled_mouse_x = GetMouseX() / scale_x;
     int scaled_mouse_y = GetMouseY() / scale_y;
 
-    if (IsKeyPressed(KEY_I)) _draw_debug_info = !_draw_debug_info;
-    if (IsKeyPressed(KEY_L)) toggle_framelock();
-    //if (IsKeyPressed(KEY_F)) toggle_borderless();
+    if (IsButtonPressed(BUTTON_DEBUG_INFO)) _draw_debug_info = !_draw_debug_info;
+    if (IsButtonPressed(BUTTON_FRAMELOCK)) toggle_framelock();
     if (IsButtonPressed(BUTTON_TOGGLE_BORDERLESS)) toggle_borderless();
     toggle_fullscreen(); //@Unfinished
 
 
-    if (IsKeyPressed(KEY_W) || IsGamepadButtonPressed(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_UP)){
+    if (IsButtonPressed(BUTTON_JUMP)){
         if(player.is_standing && player.speed_y == 0){
             player.acceleration_up = GRAVITATION * 500;
         }
     }
     else{player.acceleration_up = 0;}
-    if (IsKeyDown(KEY_A) || IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_LEFT)){ player.acceleration_left = ACCELERATION;}
+    if (IsButtonDown(BUTTON_MOVE_LEFT)){ player.acceleration_left = ACCELERATION;}
     else{player.acceleration_left = 0;}
-    if (IsKeyDown(KEY_D) || IsGamepadButtonDown(active_gamepad, GAMEPAD_BUTTON_LEFT_FACE_RIGHT)){ player.acceleration_right = ACCELERATION;}
+    if (IsButtonDown(BUTTON_MOVE_RIGHT)){ player.acceleration_right = ACCELERATION;}
     else{player.acceleration_right = 0;}
 
-    if(IsMouseButtonDown(MOUSE_BUTTON_LEFT)){
+    if(IsButtonDown(BUTTON_LMB)){
         player.x = scaled_mouse_x;
         player.y = scaled_mouse_y;
         player.is_levitating = true;
         player.falling_time = INITIAL_FALLING_TIME;
     }
-    if (IsMouseButtonUp(MOUSE_BUTTON_LEFT))
+    if (IsButtonUp(BUTTON_LMB))
         player.is_levitating = false;
 }
 
