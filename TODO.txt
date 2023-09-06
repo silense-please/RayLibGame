@@ -11,6 +11,8 @@ character control (inputs) - add input method choosing (gamepad 1, gamepad 2, ke
 divide code to funtions and structs(like: Playerstruct, draw_debugging_metrics, draw, toggle_fps_lock, ...)
 level editor (in txt for now)
 movement collision
+Big input refactor & unhardcode player inputs
+
 
 IN PROGRESS
  gravity (and jumps?)
@@ -26,9 +28,7 @@ sound system
 animation
 make RPG-7
 
-Big input refactor - key presses in input section result actions, which are then processed in game logic
-    (какая то структура данных(enum?) со всеми actions)
-Define and write down to txt all game(window) inputs
+Make button input config (txt) file and load bindings from it
 refactor after "engine v1" done - sweep comments, restructure, fill declaration.cpp, make "debug" and release game mode e.t.c
 compile release build and test it on VM and then on dimkanet's PC
 
@@ -36,11 +36,11 @@ Texture loading and unloading system and characters' ids system to link them wit
 different game "scenes" - levels basically
 
 define tile resolution (64 pixels) and refactor all "tile usages" - done???
-error handling and output - try/catch
+error handling and output - "falied to load ..." (investigate what is try/catch)
 write tests (unittests i guess)
 saves - game state (serialization?)
-unhardcode player inputs
 timestamps - UPS - game logic has to update at fixed rate (60 per sec)
+make custom delta_time for game logic (to be able to invert ime without breaking gameloop)
 
 try level editors - LDtk, Tiled
 try OpenGL integration
@@ -48,20 +48,26 @@ try online sockets
 try Box2D physics
 maybe make rez options (with buttons only for now)
 refctor - maybe write corresponding declaration in it's modules - draw, load, e.t.c (to reduce coupling)
+try to "static link mingw32 libraries" i guess - put all dll libs into exe file for release/shipping
 
 
 Problems:
-    Window crashes when audio output device is changed
+    Window crashes when audio output device is changed (miniaudio.h "ma_IAudioClient_Start" - line 20258) 
+        miniaudio crashes (in any version) only in raylib - miniaudio (github page) examples work just fine ???
+        need to investigate further in raylib - in InitAudioDevice() i guess (need to learn how to debug properly)
+        (try to use miniaudio in game window without raylib's methods such as InitAudio)
+        
     Audio system is broken - on 1500+ fps game there is a small digital noise regardless of volume, even if muted - WTF
-    fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)
+    Fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)
     Performance slowdown - might be a bottleneck(probably fine) - when on primary 1440p display in borderless mode
         - fps is dropping form ~2500 to ~1700, frametime from ~0,3-4ms to ~0,5ms, in motherloving ToggleFullscreen() it's rising up to 3000fps!
         Found the cause - nvidia shadowplay! (it's switching to game window in borderless)- slowing ~33% performance (on high framerates) (only primary monitor)
+    
     Initial resolution and aspect ratio is hardcoded - might need resize_texture2d
     Txt level dimensions are hardcoded
     Cursor is disappearing in borderless with discord or OBS - Well... what can I do?
     FPS Monitor (sometimes?) crashes SFML window upon closing FPS Monitor
-
+    Pushing out of stuck in static_object_collision() don't work properly
 
 
 Don't be afraid to delete parts of code!

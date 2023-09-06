@@ -1,6 +1,6 @@
 
-//Collision of static level objects
-void detect_collision(Player player, Game_Level level) {
+//Display collision of static objects
+void show_collision(Player player, Game_Level level) {
     for (int x = 0; x < level.width; ++x) {
         for (int y = 0; y < level.height; ++y) {
             if (level.data[x][y] == 'G') {
@@ -19,6 +19,7 @@ void level_borders_collision(Player &player) {
     if(player.x < 0) player.x = 0;
 }
 
+//Apply collision of static objects
 void static_object_collision(Player &player, Game_Level level) {
     player.is_standing = false;
     for (int x = 0; x < level.width; ++x) {
