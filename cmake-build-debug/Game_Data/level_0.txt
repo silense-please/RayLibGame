@@ -1,11 +1,18 @@
-GGGGGGGGGGGGGGGGGGGG
-G                  G
-G                  G
-G               GG G
-G                 GG
-G                  G
-G           GG    GG
-G     P            G
-G                  G
-GG    G           GG
-GGGGGGGGGGGGGGGGGGGG
+GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+G                  G                   G                   G
+G               GG G                   G                   G
+G                 GG                   G                   G
+G     P            G                   G                   G
+G           GG    GG        G                     G        G
+G                                                          G
+G                                                          G
+GG    G           G                            G     GGG   G
+GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG                   G
+G                                          GGG             G
+G                                         G      GGGG     GG
+G                                                       GGGG
+G                                  GGGGGGGGGGGG        GG  G
+G                                                     GG   G
+GGGGGG                                               GGG   G
+G   GGGG                    GG            GGG       GGGGG  G
+GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG

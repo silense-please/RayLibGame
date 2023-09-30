@@ -12,9 +12,11 @@ divide code to funtions and structs(like: Playerstruct, draw_debugging_metrics, 
 level editor (in txt for now)
 movement collision
 Big input refactor & unhardcode player inputs
+camera - side-scrolling
 
 
 IN PROGRESS
+
  gravity (and jumps?)
 make good jumps
 https://www.youtube.com/watch?v=Mo1-sKYbks0
@@ -23,7 +25,6 @@ check out raylib template platformer
 
 TODO - make test game (engine demo)
 pause system (and UI)
-camera - side-scrolling
 sound system
 animation
 make RPG-7
@@ -35,6 +36,8 @@ compile release build and test it on VM and then on dimkanet's PC
 Texture loading and unloading system and characters' ids system to link them with texture
 different game "scenes" - levels basically
 
+draw text stats&metrics for debug
+draw player collision box in debug mode
 define tile resolution (64 pixels) and refactor all "tile usages" - done???
 error handling and output - "falied to load ..." (investigate what is try/catch)
 write tests (unittests i guess)
@@ -64,7 +67,7 @@ Problems:
         Found the cause - nvidia shadowplay! (it's switching to game window in borderless)- slowing ~33% performance (on high framerates) (only primary monitor)
     
     Initial resolution and aspect ratio is hardcoded - might need resize_texture2d
-    Txt level dimensions are hardcoded
+    Txt level dimensions are hardcoded (maybe just expand them - MAX_DIMENSIONS)
     Cursor is disappearing in borderless with discord or OBS - Well... what can I do?
     FPS Monitor (sometimes?) crashes SFML window upon closing FPS Monitor
     Pushing out of stuck in static_object_collision() don't work properly

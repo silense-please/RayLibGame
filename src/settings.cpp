@@ -1,3 +1,10 @@
+//Apply window contents scaling
+void apply_screen_scale(){
+    if(IsWindowResized()) {
+        scale_x = (float)GetScreenWidth() / initial_window_width;
+        scale_y = (float)GetScreenHeight() / initial_window_height;
+    }
+}
 
 void toggle_framelock(){
     if (_fps_lock){
@@ -9,20 +16,19 @@ void toggle_framelock(){
     _fps_lock = ! _fps_lock;
 }
 
-
 void toggle_borderless(){
-    static int saved_width = GetScreenHeight();
-    static int saved_height = GetScreenWidth();
+    static int saved_width = GetScreenWidth();
+    static int saved_height =  GetScreenHeight();
     if (_is_borderless){ //Restore Windowed mode
         SetWindowSize(saved_width, saved_height);
         SetWindowPosition(int(window_position.x), int(window_position.y));
         ClearWindowState(FLAG_WINDOW_UNDECORATED);
     }
     else{ //Set Borderless
-        window_position = GetWindowPosition(); //a bit dangerous - vectors are float and position must be presize
-        Vector2 monitor_position = GetMonitorPosition(GetCurrentMonitor()); //left-upper corner of current monitor
-        saved_height = GetScreenHeight(); //or GetRenderHeight()???
+        window_position = GetWindowPosition();
+        Vector2 monitor_position = GetMonitorPosition(GetCurrentMonitor()); //Current monitor is the one where the center of window is
         saved_width = GetScreenWidth();
+        saved_height = GetScreenHeight();
         //^^^ Remember window state before turning on borderless ^^^
 
         SetWindowState(FLAG_WINDOW_UNDECORATED);

@@ -1774,7 +1774,7 @@ int GetCurrentMonitor(void)
 
             glfwGetWindowPos(CORE.Window.handle, &x, &y);
 
-            x += GetScreenWidth() / 2;  //moved window coordinates to the center
+            x += GetScreenWidth() / 2;  //moved window coordinates to the center (@silense_please)
             y += GetScreenHeight() / 2;
 
             for (int i = 0; i < monitorCount; i++)

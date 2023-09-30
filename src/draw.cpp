@@ -1,13 +1,3 @@
-//Apply window contents scaling
-void apply_screen_scale(){
-    if(IsWindowResized()) {
-        scale_x = (float)GetScreenWidth() / initial_window_width;
-        scale_y = (float)GetScreenHeight() / initial_window_height;
-
-        //texture2d_resize(player_texture);// harder version of window resizing - not done - need to resize every texture - maybe overkill, not needed
-    }
-}
-
 //Hard texture resize
 void texture2d_resize(Texture2D& texture){
 

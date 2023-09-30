@@ -39,7 +39,7 @@ void load_level(Game_Level &level){
                 total_errors++;
                 //break; //TODO make this a proper exeption
             }
-            for (int x = 0; x < line.length(); ++x) { // mb make it x < line.lenght()
+            for (int x = 0; x < line.length(); ++x) {
                 level.data[x][y] = line[x];
             }
             y++;

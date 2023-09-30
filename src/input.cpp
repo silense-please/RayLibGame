@@ -386,10 +386,14 @@ void switch_active_gamepad(){  //@Hardcoded - should be options menu switch
 }
 
 // All user input
-void process_input(Player& player){
+void process_input(Player &player, Camera2D &camera){ //Just put func  contents in main?
     switch_active_gamepad();
-    int scaled_mouse_x = GetMouseX() / scale_x;
-    int scaled_mouse_y = GetMouseY() / scale_y;
+    float scaled_mouse_x = (GetMouseX()/scale_x) / camera.zoom  + (camera.target.x  - camera.offset.x/camera.zoom); //@Put this to global?
+    float scaled_mouse_y = (GetMouseY()/scale_y) / camera.zoom  + (camera.target.y  - camera.offset.y/camera.zoom);
+
+    Vector2 mouse_delta = GetMouseDelta();
+    float scaled_mouse_dx = mouse_delta.x / scale_x / camera.zoom;
+    float scaled_mouse_dy = mouse_delta.y / scale_y / camera.zoom;
 
     if (IsButtonPressed(BUTTON_DEBUG_INFO)) _draw_debug_info = !_draw_debug_info;
     if (IsButtonPressed(BUTTON_FRAMELOCK)) toggle_framelock();
@@ -399,7 +403,7 @@ void process_input(Player& player){
 
     if (IsButtonPressed(BUTTON_JUMP)){
         if(player.is_standing && player.speed_y == 0){
-            player.acceleration_up = GRAVITATION * 500;
+            player.acceleration_up = GRAVITATION + 10000000;
         }
     }
     else{player.acceleration_up = 0;}
@@ -408,13 +412,24 @@ void process_input(Player& player){
     if (IsButtonDown(BUTTON_MOVE_RIGHT)){ player.acceleration_right = ACCELERATION;}
     else{player.acceleration_right = 0;}
 
-    if(IsButtonDown(BUTTON_LMB)){
-        player.x = scaled_mouse_x;
-        player.y = scaled_mouse_y;
+    if(IsButtonDown(BUTTON_RMB) && free_cam){ //FREE CAMERA DRAG
+
+        camera.target.x -= scaled_mouse_dx;
+        camera.target.y -= scaled_mouse_dy;
+    }
+
+    if(IsButtonPressed(BUTTON_LMB)){ //TELEPORT
+        player.x = scaled_mouse_x - player.width/2;
+        player.y = scaled_mouse_y - player.height/2;
+
         player.is_levitating = true;
         player.falling_time = INITIAL_FALLING_TIME;
+    }if (IsButtonUp(BUTTON_LMB)) player.is_levitating = false;
+
+    if(IsButtonPressed(BUTTON_FREECAM)) { //FREE CAMERA TOGGLE
+        if (free_cam) camera.zoom = 1; //@Add default zoom later
+        free_cam = !free_cam;
     }
-    if (IsButtonUp(BUTTON_LMB))
-        player.is_levitating = false;
+
 }
 
