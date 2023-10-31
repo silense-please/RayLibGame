@@ -13,6 +13,7 @@ level editor (in txt for now)
 movement collision
 Big input refactor & unhardcode player inputs
 camera - side-scrolling
+pause system (and UI)
 
 
 IN PROGRESS
@@ -23,8 +24,7 @@ https://www.youtube.com/watch?v=Mo1-sKYbks0
 https://www.youtube.com/watch?v=7KiK0Aqtmzc&t=216s
 check out raylib template platformer
 
-TODO - make test game (engine demo)
-pause system (and UI)
+TODO - make test game (engine demo) - КОРОЧЕ ДЕЛАЙ УЖЕ МЕХАНИКИ ИГРЫ, А ВСЯКИЕ ВТОРОСТЕПЕННЫЕ МЕНЮ ПОТОМ
 sound system
 animation
 make RPG-7
@@ -44,6 +44,7 @@ write tests (unittests i guess)
 saves - game state (serialization?)
 timestamps - UPS - game logic has to update at fixed rate (60 per sec)
 make custom delta_time for game logic (to be able to invert ime without breaking gameloop)
+move player coordinates to the center of body?
 
 try level editors - LDtk, Tiled
 try OpenGL integration

@@ -1,20 +1,3 @@
-//Hard texture resize
-void texture2d_resize(Texture2D& texture){
-
-    //иногда пиксели подглючивают(в максимайзд например)
-    static int tex_bunny_width = texture.width;
-    static int tex_bunny_height = texture.height;
-
-    //this is not fixing artefacts
-//    player_image = LoadImage("Game_Data/player.png");
-//    ImageResizeNN(&player_image,tex_bunny_width * scale_x, tex_bunny_height * scale_y);
-//    UnloadTexture(player_texture);
-//    player_texture = LoadTextureFromImage(player_image);
-
-    texture.width = tex_bunny_width * scale_x ;
-    texture.height = tex_bunny_height * scale_y;
-
-}
 
 // Crosshair in the center of screen demonstrating current window moonitor
 void draw_screen_center(){
@@ -61,9 +44,8 @@ void draw_debug_info(){
     }
 
     DrawText(TextFormat( "CURRENT MONITOR: %i", GetCurrentMonitor()), 200, 0, 40, RED);
-    //DrawText(TextFormat( "X: %i \nY: %i", int(GetWindowPosition().x),int(GetWindowPosition().y)), 200, 200, 20, DARKGRAY);
     DrawText(TextFormat( "FRAMETIME: %f", GetFrameTime() *1000), 10, 40, 20, LIME);
-    draw_screen_center(); // make this toggle
+    draw_screen_center(); //@make this toggle
     draw_gamepads();
     gamepad_disconnect_warning();
 }
@@ -82,7 +64,7 @@ void static_objects_draw(Game_Level level, Texture2D texture, char object_symbol
 // Draw resized target render texture on the screen (Final draw)
 void draw_target_texture(RenderTexture2D& target){
     BeginDrawing();
-    ClearBackground(RAYWHITE);
+    ClearBackground(LIGHTGRAY);
     // Draw render texture to screen, properly scaled
     DrawTexturePro(target.texture, (Rectangle){ 0.0f, 0.0f, (float)target.texture.width, (float)-target.texture.height },
                    (Rectangle){(GetScreenWidth() - ((float)initial_window_width*scale_x))*0.5f, (GetScreenHeight() - ((float)initial_window_height*scale_y))*0.5f,

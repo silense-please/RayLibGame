@@ -386,10 +386,12 @@ void switch_active_gamepad(){  //@Hardcoded - should be options menu switch
 }
 
 // All user input
-void process_input(Player &player, Camera2D &camera){ //Just put func  contents in main?
+void process_input(Player &player, Camera2D &camera){ //@Just put func contents in main?
+    if(IsButtonPressed(BUTTON_PAUSE)){ _is_menu = ! _is_menu; _is_paused = !_is_paused;}
+
     switch_active_gamepad();
-    float scaled_mouse_x = (GetMouseX()/scale_x) / camera.zoom  + (camera.target.x  - camera.offset.x/camera.zoom); //@Put this to global?
-    float scaled_mouse_y = (GetMouseY()/scale_y) / camera.zoom  + (camera.target.y  - camera.offset.y/camera.zoom);
+    scaled_mouse_x = (GetMouseX()/scale_x) / camera.zoom  + (camera.target.x  - camera.offset.x/camera.zoom);
+    scaled_mouse_y = (GetMouseY()/scale_y) / camera.zoom  + (camera.target.y  - camera.offset.y/camera.zoom);
 
     Vector2 mouse_delta = GetMouseDelta();
     float scaled_mouse_dx = mouse_delta.x / scale_x / camera.zoom;
@@ -397,8 +399,9 @@ void process_input(Player &player, Camera2D &camera){ //Just put func  contents 
 
     if (IsButtonPressed(BUTTON_DEBUG_INFO)) _draw_debug_info = !_draw_debug_info;
     if (IsButtonPressed(BUTTON_FRAMELOCK)) toggle_framelock();
-    if (IsButtonPressed(BUTTON_TOGGLE_BORDERLESS)) toggle_borderless();
+    if ((IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))  && IsKeyPressed(KEY_ENTER)) toggle_borderless();
     toggle_fullscreen(); //@Unfinished
+    apply_screen_scale();
 
 
     if (IsButtonPressed(BUTTON_JUMP)){
@@ -412,24 +415,27 @@ void process_input(Player &player, Camera2D &camera){ //Just put func  contents 
     if (IsButtonDown(BUTTON_MOVE_RIGHT)){ player.acceleration_right = ACCELERATION;}
     else{player.acceleration_right = 0;}
 
-    if(IsButtonDown(BUTTON_RMB) && free_cam){ //FREE CAMERA DRAG
+    if(!_is_menu){
+        if(IsButtonDown(BUTTON_RMB) && free_cam){ //FREE CAMERA DRAG
 
-        camera.target.x -= scaled_mouse_dx;
-        camera.target.y -= scaled_mouse_dy;
+            camera.target.x -= scaled_mouse_dx;
+            camera.target.y -= scaled_mouse_dy;
+        }
+
+        if(IsButtonPressed(BUTTON_LMB)){ //TELEPORT
+            player.x = scaled_mouse_x - player.width/2;
+            player.y = scaled_mouse_y - player.height/2;
+
+            player.is_levitating = true;
+            player.falling_time = INITIAL_FALLING_TIME;
+        }if (IsButtonUp(BUTTON_LMB)) player.is_levitating = false;
+
+        if(IsButtonPressed(BUTTON_FREECAM)) { //FREE CAMERA TOGGLE
+            if (free_cam) camera.zoom = 1; //@Add default zoom later
+            free_cam = !free_cam;
+        }
     }
 
-    if(IsButtonPressed(BUTTON_LMB)){ //TELEPORT
-        player.x = scaled_mouse_x - player.width/2;
-        player.y = scaled_mouse_y - player.height/2;
-
-        player.is_levitating = true;
-        player.falling_time = INITIAL_FALLING_TIME;
-    }if (IsButtonUp(BUTTON_LMB)) player.is_levitating = false;
-
-    if(IsButtonPressed(BUTTON_FREECAM)) { //FREE CAMERA TOGGLE
-        if (free_cam) camera.zoom = 1; //@Add default zoom later
-        free_cam = !free_cam;
-    }
 
 }
 

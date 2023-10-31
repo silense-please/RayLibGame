@@ -9,8 +9,10 @@ void apply_screen_scale(){
 void toggle_framelock(){
     if (_fps_lock){
         SetTargetFPS(0);
+        //ClearWindowState(FLAG_VSYNC_HINT);
     }
     else{
+        //SetWindowState(FLAG_VSYNC_HINT);
         SetTargetFPS(TARGET_FPS);
     }
     _fps_lock = ! _fps_lock;
