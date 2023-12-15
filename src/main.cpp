@@ -10,12 +10,12 @@ int main(void){
 
     // Initialization
     SetConfigFlags(FLAG_WINDOW_RESIZABLE); // |FLAG_VSYNC_HINT);
-    InitWindow(window_width, window_height, "TEST RAYLIB WINDOW");
+    InitWindow(window_width, window_height, "RAYLIB-DEMO");
 
     // Render texture initialization - to hold the rendering result be able to resize it
     RenderTexture2D target = LoadRenderTexture(window_width, window_height);
 
-    SetTargetFPS(TARGET_FPS);
+    SetTargetFPS(120);
     SetExitKey(KEY_END);
 
     Texture2D player_texture = LoadTexture("Game_Data/player_64p.png");
@@ -51,32 +51,42 @@ int main(void){
         // Process Input ----------------------------------------------------------------
         process_input(player, camera);
 
-        for (int i = 0; i < MENU_BUTTONS; ++i) {
-
-            if (CheckCollisionPointRec((Vector2){GetMouseX()/scale_x, GetMouseY()/scale_y},
-                                       (Rectangle){menu_btns[i].x, menu_btns[i].y, menu_btns[i].width, menu_btns[i].height})){
-                menu_btns[i].state = 1;
-                if (IsButtonPressed(BUTTON_LMB)){
-                    switch (menu_btns[i].id) {
-                        case BTN_RESUME: _is_menu = 0; _is_paused = 0; break;
-                        case BTN_QUIT: close_window = 1; break;
+        if(_is_menu){
+            for (int i = 0; i < MENU_BUTTONS; ++i) {
+                if (CheckCollisionPointRec((Vector2) {GetMouseX() / scale_x, GetMouseY() / scale_y},
+                                           (Rectangle) {menu_btns[i].x, menu_btns[i].y, menu_btns[i].width,
+                                                        menu_btns[i].height})) {
+                    menu_btns[i].state = 1;
+                    if (IsButtonReleased(BUTTON_LMB)) {
+                        switch (menu_btns[i].id) {
+                            case BTN_RESUME: _is_menu = 0; _is_paused = 0; break;
+                            case BTN_QUIT: close_window = 1; break;
+                        }
                     }
-                }
-            } else menu_btns[i].state = 0;
+                } else menu_btns[i].state = 0;
+            }
         }
-
-
 
         // Game Logic -------------------------------------------------------------------
         if(_is_paused) delta_time = 0;
-        else delta_time = GetFrameTime();
+        else delta_time = GetFrameTime() * GAME_SPEED;
 
-        if(!player.is_standing && !player.is_levitating && player.speed_y > 0){
+        if(!player.is_standing && !player.is_levitating && player.speed_y >= 0){ //&& player.speed_y >= 0
             player.falling_time += delta_time;
         }
 
         player.speed_x = delta_time * (player.acceleration_right - player.acceleration_left);
-        player.speed_y = player.falling_time * (GRAVITATION - player.acceleration_up) * delta_time; // @Херня - переделывай
+
+        //player.speed_y = 0.5*GRAVITATION*player.falling_time*player.falling_time + player.speed_y * player.falling_time; // Put this into vertical player acceleration
+        player.acceleration_down = 0.5*GRAVITATION*player.falling_time*player.falling_time + player.speed_y * player.falling_time;
+        //if (IsButtonPressed(BUTTON_JUMP)){ player.speed_y += 1000 ;}
+
+        //чёто не то с плюсами скорости
+
+        //player.speed_y *= delta_time;
+        player.speed_y = delta_time * (player.acceleration_down - player.acceleration_up);
+
+
 
         static_object_collision(player, current_level);
 
@@ -118,11 +128,11 @@ int main(void){
 
             //@Temporary - move to draw debug info
             DrawText(TextFormat("standing: %d", player.is_standing), 10, 40, 20, LIME);
-            //DrawText(TextFormat("falling_time: %f ", player.falling_time), 10, 80, 20, LIME);
-            //DrawText(TextFormat("floating: %d", player.is_levitating), 10, 120, 20, LIME);
-            DrawText(TextFormat("player X:%f Y:%f ",player.x, player.y), 10, 80, 20, LIME);
-            DrawText(TextFormat("camera offset X:%f Y:%f", camera.offset.x, camera.offset.y), 10, 120, 20, LIME);
-            DrawText(TextFormat("camera target X:%f Y:%f \n zoom %f", camera.target.x, camera.target.y, camera.zoom), 10, 150, 20, LIME);
+            DrawText(TextFormat("falling_time: %f ", player.falling_time), 10, 80, 20, LIME);
+            DrawText(TextFormat("Speed Y: %f", player.speed_y), 10, 120, 20, LIME);
+            //DrawText(TextFormat("player X:%f Y:%f ",player.x, player.y), 10, 80, 20, LIME);
+            //DrawText(TextFormat("camera offset X:%f Y:%f", camera.offset.x, camera.offset.y), 10, 120, 20, LIME);
+            //DrawText(TextFormat("camera target X:%f Y:%f \n zoom %f", camera.target.x, camera.target.y, camera.zoom), 10, 150, 20, LIME);
             if (free_cam) DrawText("FREE CAMREA", 700, 100, 40, DARKGREEN);
             show_collision(player,current_level); //@Temporary - maybe move to draw_debug_info after collision system is finished
 

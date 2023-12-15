@@ -30,10 +30,14 @@ void static_object_collision(Player &player, Game_Level level) {
                 // Down collision
                 if (CheckCollisionRecs((Rectangle){player.x, player.y + player.height, player.width, player.height}, // Check if player is one tile away of collision or closer
                                        (Rectangle){(float)x*TILESIZE, (float)y*TILESIZE, TILESIZE, TILESIZE})){
-                    if(!CheckCollisionRecs((Rectangle){player.x, player.y, player.width, player.height},
+                    if(!CheckCollisionRecs((Rectangle){player.x, player.y, player.width, player.height}, // If player is NOT stuck in collision
                                            (Rectangle){(float)x*TILESIZE, (float)y*TILESIZE, TILESIZE, TILESIZE})){
-                        if(player.speed_y > y*TILESIZE - (player.y + player.height)) //Apply collision - if player wants to move into collision, move him right next to it
-                            player.speed_y = y*TILESIZE - (player.y + player.height);
+                        if(player.speed_y > y*TILESIZE - (player.y + player.height)) { //Apply collision - if player wants to move into collision, move him right next to it
+                            player.speed_y = y * TILESIZE - (player.y + player.height);
+                            //Check if player is standing on the ground
+                            player.is_standing = true;
+                            player.falling_time = INITIAL_FALLING_TIME;
+                        }
                     } else
                         stuck_down = 1; //to push out if stuck (actually this is suppoused to be an error cause player shouldn't be stuck in collided objects)
                 }
@@ -68,15 +72,15 @@ void static_object_collision(Player &player, Game_Level level) {
                         stuck_left = 1; //to push out if stuck
                 }
                 //If player is stuck inside collision
-                if(stuck_up || stuck_down || stuck_left || stuck_right){
+                if(stuck_up || stuck_down || stuck_left || stuck_right){ //@Broken - should not be pushing diagonally
                     player.speed_y = (stuck_up - stuck_down) * 0.2 * delta_time * ACCELERATION;
                     player.speed_x = (stuck_left - stuck_right) * 0.2 * delta_time * ACCELERATION;
                 }
-                //Check if player is standing on the ground
-                if(player.y + player.height == y*TILESIZE){
-                    player.is_standing = true;
-                    player.falling_time = INITIAL_FALLING_TIME;
-                }
+
+//                if(player.y + player.height == y*TILESIZE){  //@ DELETE THIS
+//                    player.is_standing = true;
+//                    player.falling_time = INITIAL_FALLING_TIME;
+//                }
             }
         }
     }

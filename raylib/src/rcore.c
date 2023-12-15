@@ -2874,9 +2874,9 @@ int GetFPS(void)
 }
 
 // Get time in seconds for last frame drawn (delta time)
-float GetFrameTime(void)
+double GetFrameTime(void)
 {
-    return (float)CORE.Time.frame;
+    return CORE.Time.frame;
 }
 
 // Get elapsed time measure in seconds since InitTimer()

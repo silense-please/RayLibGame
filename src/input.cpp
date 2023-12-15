@@ -399,17 +399,18 @@ void process_input(Player &player, Camera2D &camera){ //@Just put func contents 
 
     if (IsButtonPressed(BUTTON_DEBUG_INFO)) _draw_debug_info = !_draw_debug_info;
     if (IsButtonPressed(BUTTON_FRAMELOCK)) toggle_framelock();
-    if ((IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))  && IsKeyPressed(KEY_ENTER)) toggle_borderless();
+    //if ((IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))  && IsKeyPressed(KEY_ENTER)) toggle_borderless();
+    if (IsKeyPressed(KEY_F11)) toggle_borderless(); // screw Alt Enter
     toggle_fullscreen(); //@Unfinished
     apply_screen_scale();
 
 
     if (IsButtonPressed(BUTTON_JUMP)){
-        if(player.is_standing && player.speed_y == 0){
-            player.acceleration_up = GRAVITATION + 10000000;
-        }
+        if(player.is_standing)
+            player.acceleration_up = 10000;
     }
-    else{player.acceleration_up = 0;}
+    else player.acceleration_up = 0;
+
     if (IsButtonDown(BUTTON_MOVE_LEFT)){ player.acceleration_left = ACCELERATION;}
     else{player.acceleration_left = 0;}
     if (IsButtonDown(BUTTON_MOVE_RIGHT)){ player.acceleration_right = ACCELERATION;}
@@ -426,10 +427,10 @@ void process_input(Player &player, Camera2D &camera){ //@Just put func contents 
             player.x = scaled_mouse_x - player.width/2;
             player.y = scaled_mouse_y - player.height/2;
 
-            player.is_levitating = true;
             player.falling_time = INITIAL_FALLING_TIME;
-        }if (IsButtonUp(BUTTON_LMB)) player.is_levitating = false;
-
+            player.speed_x = 0;
+            player.speed_y = 0;
+        }
         if(IsButtonPressed(BUTTON_FREECAM)) { //FREE CAMERA TOGGLE
             if (free_cam) camera.zoom = 1; //@Add default zoom later
             free_cam = !free_cam;

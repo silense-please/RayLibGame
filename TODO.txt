@@ -14,20 +14,20 @@ movement collision
 Big input refactor & unhardcode player inputs
 camera - side-scrolling
 pause system (and UI)
+ gravity (and jumps?)
 
 
 IN PROGRESS
-
- gravity (and jumps?)
 make good jumps
 https://www.youtube.com/watch?v=Mo1-sKYbks0
 https://www.youtube.com/watch?v=7KiK0Aqtmzc&t=216s
 check out raylib template platformer
 
 TODO - make test game (engine demo) - КОРОЧЕ ДЕЛАЙ УЖЕ МЕХАНИКИ ИГРЫ, А ВСЯКИЕ ВТОРОСТЕПЕННЫЕ МЕНЮ ПОТОМ
-sound system
+sound system & event triggers in level
 animation
 make RPG-7
+debug mode on/off switch
 
 Make button input config (txt) file and load bindings from it
 refactor after "engine v1" done - sweep comments, restructure, fill declaration.cpp, make "debug" and release game mode e.t.c
@@ -36,15 +36,20 @@ compile release build and test it on VM and then on dimkanet's PC
 Texture loading and unloading system and characters' ids system to link them with texture
 different game "scenes" - levels basically
 
+pull out Raylib's update and draw (delta)time alike GetFrameTime() to measure performance costs (from rcore.c)
+rebuild palyer accelerations to the real vectors
 draw text stats&metrics for debug
 draw player collision box in debug mode
-define tile resolution (64 pixels) and refactor all "tile usages" - done???
 error handling and output - "falied to load ..." (investigate what is try/catch)
 write tests (unittests i guess)
 saves - game state (serialization?)
-timestamps - UPS - game logic has to update at fixed rate (60 per sec)
+timestamps - UPS - game logic(physics etc) has to update at fixed rate (60 per sec) - not necessary
+    (implement using " if(deltatime==1/60sec) -> do game logic" ???)
 make custom delta_time for game logic (to be able to invert ime without breaking gameloop)
 move player coordinates to the center of body?
+refactor 1 time used functions into { "blocks of code" and also separate standalone blocks with {} - for code clarity
+                                    }
+
 
 try level editors - LDtk, Tiled
 try OpenGL integration
@@ -59,13 +64,14 @@ Problems:
     Window crashes when audio output device is changed (miniaudio.h "ma_IAudioClient_Start" - line 20258) 
         miniaudio crashes (in any version) only in raylib - miniaudio (github page) examples work just fine ???
         need to investigate further in raylib - in InitAudioDevice() i guess (need to learn how to debug properly)
-        (try to use miniaudio in game window without raylib's methods such as InitAudio)
+        (try to use miniaudio in game window without raylib's methods such as InitAudio) - try out this bug in raylib 5.0
         
-    Audio system is broken - on 1500+ fps game there is a small digital noise regardless of volume, even if muted - WTF
+    Audio system is broken - on 1500+ fps there is a small digital noise regardless of volume, even if muted - WTF
     Fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)
     Performance slowdown - might be a bottleneck(probably fine) - when on primary 1440p display in borderless mode
         - fps is dropping form ~2500 to ~1700, frametime from ~0,3-4ms to ~0,5ms, in motherloving ToggleFullscreen() it's rising up to 3000fps!
-        Found the cause - nvidia shadowplay! (it's switching to game window in borderless)- slowing ~33% performance (on high framerates) (only primary monitor)
+        Found the cause - nvidia shadowplay! (it's switching to game window in borderless)- slowing ~33% performance
+        (on high framerates) (only primary monitor)
     
     Initial resolution and aspect ratio is hardcoded - might need resize_texture2d
     Txt level dimensions are hardcoded (maybe just expand them - MAX_DIMENSIONS)
