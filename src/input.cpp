@@ -407,21 +407,28 @@ void process_input(Player &player, Camera2D &camera){ //@Just put func contents 
 
     if (IsButtonPressed(BUTTON_JUMP)){
         if(player.is_standing)
-            player.acceleration_up = 10000;
+            //player.acceleration_up = 1000000;
+            player.speed_y = -1000;
     }
-    else player.acceleration_up = 0;
+    else //player.acceleration_up = 0;
 
-    if (IsButtonDown(BUTTON_MOVE_LEFT)){ player.acceleration_left = ACCELERATION;}
-    else{player.acceleration_left = 0;}
-    if (IsButtonDown(BUTTON_MOVE_RIGHT)){ player.acceleration_right = ACCELERATION;}
-    else{player.acceleration_right = 0;}
+    if (IsButtonDown(BUTTON_MOVE_LEFT)){ player.speed_x = -1000;}
+    else if (IsButtonDown(BUTTON_MOVE_RIGHT)){ player.speed_x = 1000;}
+    else{player.speed_x  = 0;}
+
+//    if (IsButtonDown(BUTTON_MOVE_LEFT)){ player.acceleration_left = ACCELERATION;}
+//    else{player.acceleration_left = 0;}
+//    if (IsButtonDown(BUTTON_MOVE_RIGHT)){ player.acceleration_right = ACCELERATION;}
+//    else{player.acceleration_right = 0;}
 
     if(!_is_menu){
-        if(IsButtonDown(BUTTON_RMB) && free_cam){ //FREE CAMERA DRAG
+        if(IsButtonDown(BUTTON_MMB) && free_cam){ //FREE CAMERA DRAG
 
             camera.target.x -= scaled_mouse_dx;
             camera.target.y -= scaled_mouse_dy;
+            SetMouseCursor(9);
         }
+        else{SetMouseCursor(0);}
 
         if(IsButtonPressed(BUTTON_LMB)){ //TELEPORT
             player.x = scaled_mouse_x - player.width/2;

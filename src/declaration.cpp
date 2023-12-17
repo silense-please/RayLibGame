@@ -3,7 +3,9 @@
 #include "raylib.h"
 #include <fstream>
 #include <iostream>
+//#include <cmath> //DO I NEED THIS ?
 using std::string;
+using std::abs;
 
 
 // Global variables (use 'extern' if breaks)
@@ -37,10 +39,10 @@ int active_gamepad = 0;
 const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config - not hooking for some reason
 
 
-#define GAME_SPEED 1.5 // slow-mo
-#define ACCELERATION 800.0f
+#define GAME_SPEED 1.0 // slow-mo
+#define ACCELERATION 8000.0f
 #define GRAVITATION 5000.0f
-#define INITIAL_FALLING_TIME 0.20 // initial acceleration time of free fall - for faster falling
+#define INITIAL_FALLING_TIME 0.00 // initial acceleration time of free fall - for faster falling
 
 
 //Input bindings - be wary of same key duplicating to multiple buttons
@@ -51,8 +53,13 @@ string BUTTON_FRAMELOCK[MAX_BUTTON_BINDINGS]  {"KEY_L"};
 string BUTTON_FREECAM[MAX_BUTTON_BINDINGS]  {"KEY_R"};
 string BUTTON_PAUSE[MAX_BUTTON_BINDINGS]  {"KEY_ESCAPE", "GAMEPAD_BUTTON_MIDDLE_RIGHT"};
 
-string BUTTON_LMB[MAX_BUTTON_BINDINGS]  {"MOUSE_BUTTON_LEFT"};
+string BUTTON_LMB[MAX_BUTTON_BINDINGS]  {"MOUSE_BUTTON_LEFT"}; // You can switch mouse buttons if you're lefty
 string BUTTON_RMB[MAX_BUTTON_BINDINGS]  {"MOUSE_BUTTON_RIGHT"};
+string BUTTON_MMB[MAX_BUTTON_BINDINGS]  {"MOUSE_BUTTON_MIDDLE"};
+
+
+
+
 
 string BUTTON_MOVE_RIGHT[MAX_BUTTON_BINDINGS]  {"KEY_D", "KEY_RIGHT", "GAMEPAD_BUTTON_LEFT_FACE_RIGHT"};
 string BUTTON_MOVE_LEFT[MAX_BUTTON_BINDINGS]  {"KEY_A", "KEY_LEFT","GAMEPAD_BUTTON_LEFT_FACE_LEFT"};

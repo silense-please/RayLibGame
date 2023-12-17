@@ -11,6 +11,7 @@ int main(void){
     // Initialization
     SetConfigFlags(FLAG_WINDOW_RESIZABLE); // |FLAG_VSYNC_HINT);
     InitWindow(window_width, window_height, "RAYLIB-DEMO");
+    //SetMouseCursor(0);
 
     // Render texture initialization - to hold the rendering result be able to resize it
     RenderTexture2D target = LoadRenderTexture(window_width, window_height);
@@ -75,30 +76,29 @@ int main(void){
             player.falling_time += delta_time;
         }
 
-        player.speed_x = delta_time * (player.acceleration_right - player.acceleration_left);
 
-        //player.speed_y = 0.5*GRAVITATION*player.falling_time*player.falling_time + player.speed_y * player.falling_time; // Put this into vertical player acceleration
-        player.acceleration_down = 0.5*GRAVITATION*player.falling_time*player.falling_time + player.speed_y * player.falling_time;
-        //if (IsButtonPressed(BUTTON_JUMP)){ player.speed_y += 1000 ;}
-
-        //чёто не то с плюсами скорости
-
-        //player.speed_y *= delta_time;
-        player.speed_y = delta_time * (player.acceleration_down - player.acceleration_up);
+        player.acceleration_down = GRAVITATION;
 
 
+        player.speed_x += delta_time * (player.acceleration_right - player.acceleration_left);
+        player.speed_y += delta_time * (player.acceleration_down - player.acceleration_up);
 
-        static_object_collision(player, current_level);
 
-        player.x += player.speed_x;
-        player.y += player.speed_y;
+        static_object_collision_by_speed(player, current_level);
+
+
+        player.x += player.speed_x * delta_time;
+        player.y += player.speed_y * delta_time;
+        //static_object_collision_by_coordinates(player, current_level);
+
 
         level_borders_collision(player, current_level);
 
         // Camera just follows player for now
-        camera.zoom += ((float)GetMouseWheelMove()*0.1f);
+        camera.zoom += ((float)GetMouseWheelMove()*0.1f * camera.zoom);
         if(!free_cam)
             camera.target = (Vector2){ player.x + player.width/2, player.y + player.height/2};
+
 
 
         BeginTextureMode(target);{ // Draw everything to target texture to enable window scaling/stretching
