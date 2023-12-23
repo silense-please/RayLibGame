@@ -6,7 +6,7 @@ void show_collision(Player player, Game_Level level) {
             if (level.data[x][y] == 'G') {
                 if (CheckCollisionRecs((Rectangle){player.x, player.y, player.width, player.height},
                                        (Rectangle){(float)x*TILESIZE, (float)y*TILESIZE, TILESIZE, TILESIZE}))
-                    DrawText("COLLISION WITH GROUND", 100, 200, 50, YELLOW);
+                    DrawText("COLLISION WITH GROUND", 350, 50, 50, YELLOW);
             }
         }
     }
@@ -36,7 +36,6 @@ void static_object_collision_by_speed(Player &player, Game_Level level) {
                             player.speed_y = (y * TILESIZE - (player.y + player.height)) /delta_time;
                             //Check if player is standing on the ground
                             player.is_standing = true;
-                            player.falling_time = INITIAL_FALLING_TIME;
                         }
                     } else
                         stuck_down = 1; //to push out if stuck (actually this is suppoused to be an error cause player shouldn't be stuck in collided objects)
@@ -88,7 +87,6 @@ void static_object_collision_by_speed(Player &player, Game_Level level) {
 
 
 
-
 void static_object_collision_by_coordinates(Player &player, Game_Level level){ // VERSION 2
     player.is_standing = false;
     for (int x = 0; x < level.width; ++x) {
@@ -107,7 +105,6 @@ void static_object_collision_by_coordinates(Player &player, Game_Level level){ /
                             //Confirm that player is standing on the ground
                             player.is_standing = true;
                             player.speed_y = 0;
-                            player.falling_time = INITIAL_FALLING_TIME;
                         }
                         else { player.y = y * TILESIZE + TILESIZE; player.speed_y = 0; } // UP COLLISION
                     }

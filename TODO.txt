@@ -14,25 +14,25 @@ movement collision
 Big input refactor & unhardcode player inputs
 camera - side-scrolling
 pause system (and UI)
- gravity (and jumps?)
+ gravity and jumps
+make good jumps https://www.youtube.com/watch?v=Mo1-sKYbks0 https://www.youtube.com/watch?v=7KiK0Aqtmzc&t=216s
 
 
 IN PROGRESS
-make good jumps
-https://www.youtube.com/watch?v=Mo1-sKYbks0
-https://www.youtube.com/watch?v=7KiK0Aqtmzc&t=216s
-check out raylib template platformer
+fix collision on corners, define jump forces, times, etc (and mb refactor jump code, its too messy)
 
 TODO - make test game (engine demo) - КОРОЧЕ ДЕЛАЙ УЖЕ МЕХАНИКИ ИГРЫ, А ВСЯКИЕ ВТОРОСТЕПЕННЫЕ МЕНЮ ПОТОМ
-sound system & event triggers in level
+sound system
+event triggers in level , text in level (somewhere between the sacred ...)
 animation
 make RPG-7
 debug mode on/off switch
 
 Make button input config (txt) file and load bindings from it
-refactor after "engine v1" done - sweep comments, restructure, fill declaration.cpp, make "debug" and release game mode e.t.c
+Cleanup after "engine v1" done - sweep comments, restructure, fill declaration.cpp, make "debug" and release game mode e.t.c
 compile release build and test it on VM and then on dimkanet's PC
 
+mb collisions can be improved (the corners)
 Texture loading and unloading system and characters' ids system to link them with texture
 different game "scenes" - levels basically
 
@@ -49,6 +49,8 @@ make custom delta_time for game logic (to be able to invert ime without breaking
 move player coordinates to the center of body?
 refactor 1 time used functions into { "blocks of code" and also separate standalone blocks with {} - for code clarity
                                     }
+maybe consider more jump help like edge detection -  https://youtu.be/3sWTzMsmdx8?si=aEuX8x2OJ8Y_qTnX&t=109
+                                                    https://youtu.be/Bsy8pknHc0M?si=3_uyQANwHjnAYpNt&t=157
 
 
 try level editors - LDtk, Tiled
@@ -61,23 +63,26 @@ try to "static link mingw32 libraries" i guess - put all dll libs into exe file 
 
 
 Problems:
-    Window crashes when audio output device is changed (miniaudio.h "ma_IAudioClient_Start" - line 20258) 
+   -Screen tearing occurs when Vsync is off - I cant find VRR option in OpenGL - to render any fps(1000) without tearing
+        (e.g. in Hollow Knight there is no tearing no matter fps: 30 - 300, vsync off, on second 60Hz monitor)
+        I kinda want game to run at 500 fps without tearing (or ANY issues), but i guess its okay to just Vsync it
+   -Window crashes when audio output device is changed (miniaudio.h "ma_IAudioClient_Start" - line 20258)
         miniaudio crashes (in any version) only in raylib - miniaudio (github page) examples work just fine ???
         need to investigate further in raylib - in InitAudioDevice() i guess (need to learn how to debug properly)
         (try to use miniaudio in game window without raylib's methods such as InitAudio) - try out this bug in raylib 5.0
         
-    Audio system is broken - on 1500+ fps there is a small digital noise regardless of volume, even if muted - WTF
-    Fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)
-    Performance slowdown - might be a bottleneck(probably fine) - when on primary 1440p display in borderless mode
-        - fps is dropping form ~2500 to ~1700, frametime from ~0,3-4ms to ~0,5ms, in motherloving ToggleFullscreen() it's rising up to 3000fps!
+   -Audio system is broken - on 1500+ fps there is a small digital noise regardless of volume, even if muted - WTF
+   -Fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)
+   -Performance slowdown - might be a bottleneck(probably fine) - when on primary 1440p display in borderless mode
+        fps is dropping form ~2500 to ~1700, frametime: ~0,3-4ms to ~0,5ms, in ToggleFullscreen() it's rising up to 3000fps!
         Found the cause - nvidia shadowplay! (it's switching to game window in borderless)- slowing ~33% performance
-        (on high framerates) (only primary monitor)
+        (on high framerates) (only primary monitor) (slows down even when overlay is off)
     
-    Initial resolution and aspect ratio is hardcoded - might need resize_texture2d
-    Txt level dimensions are hardcoded (maybe just expand them - MAX_DIMENSIONS)
-    Cursor is disappearing in borderless with discord or OBS - Well... what can I do?
-    FPS Monitor (sometimes?) crashes SFML window upon closing FPS Monitor
-    Pushing out of stuck in static_object_collision() don't work properly
+   -Initial resolution and aspect ratio is hardcoded - might need resize_texture2d
+   -Txt level dimensions are hardcoded (maybe just expand them - MAX_DIMENSIONS)
+   -Cursor is disappearing in borderless with discord or OBS - Well... what can I do?
+   -FPS Monitor (sometimes?) crashes SFML window upon closing FPS Monitor
+   -Pushing out of stuck in static_object_collision() don't work properly
 
 
 Don't be afraid to delete parts of code!

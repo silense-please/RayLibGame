@@ -7,15 +7,15 @@ void apply_screen_scale(){
 }
 
 void toggle_framelock(){
-    if (_fps_lock){
-        SetTargetFPS(0);
-        //ClearWindowState(FLAG_VSYNC_HINT);
-    }
-    else{
-        //SetWindowState(FLAG_VSYNC_HINT);
-        SetTargetFPS(TARGET_FPS);
-    }
+    if (_fps_lock){SetTargetFPS(0);}
+    else{SetTargetFPS(TARGET_FPS);}
     _fps_lock = ! _fps_lock;
+}
+
+void toggle_vsync(){
+    if (_vsync){ ClearWindowState(FLAG_VSYNC_HINT);}
+    else{SetWindowState(FLAG_VSYNC_HINT);}
+    _vsync = ! _vsync;
 }
 
 void toggle_borderless(){

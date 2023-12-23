@@ -399,42 +399,57 @@ void process_input(Player &player, Camera2D &camera){ //@Just put func contents 
 
     if (IsButtonPressed(BUTTON_DEBUG_INFO)) _draw_debug_info = !_draw_debug_info;
     if (IsButtonPressed(BUTTON_FRAMELOCK)) toggle_framelock();
+    if (IsButtonPressed(BUTTON_VSYNC)) toggle_vsync();
     //if ((IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))  && IsKeyPressed(KEY_ENTER)) toggle_borderless();
     if (IsKeyPressed(KEY_F11)) toggle_borderless(); // screw Alt Enter
     toggle_fullscreen(); //@Unfinished
     apply_screen_scale();
 
-
+    /// JUMP
     if (IsButtonPressed(BUTTON_JUMP)){
-        if(player.is_standing)
-            //player.acceleration_up = 1000000;
-            player.speed_y = -1000;
+        player.jump_input_buffer_time = 0.05;     //@Define
     }
-    else //player.acceleration_up = 0;
+    if (player.jump_input_buffer_time > 0){
+        player.jump_input_buffer_time -= delta_time;
+        // JUMP!
+        if((player.is_standing || player.air_time < 0.07) && !player.is_jumping) { //airtime needed for coyote time       @Define airtime
+            player.speed_y = -1200;               //@Define jump force
+            player.jump_input_buffer_time = 0;
+            player.falling_time = 0;
+            player.is_standing = false;
+            player.is_holding_jump = true;
+            player.is_jumping = true;
+        }
+    }
+    player.acceleration_down = GRAVITATION;
+    if (IsButtonDown(BUTTON_JUMP) && player.is_holding_jump && player.falling_time == 0){
+        player.jump_input_hold_time += delta_time;
+    }else if (player.is_jumping){
+        if (player.jump_input_hold_time < 0.09) player.jump_input_hold_time = 0.09;
+        player.acceleration_down = GRAVITATION* 0.27 / player.jump_input_hold_time;
+        player.is_holding_jump = false;
+    }
 
-    if (IsButtonDown(BUTTON_MOVE_LEFT)){ player.speed_x = -1000;}
-    else if (IsButtonDown(BUTTON_MOVE_RIGHT)){ player.speed_x = 1000;}
+    /// WALK
+    if (IsButtonDown(BUTTON_MOVE_LEFT)){ player.speed_x = -800;}  //@define walking speed
+    else if (IsButtonDown(BUTTON_MOVE_RIGHT)){ player.speed_x = 800;}
     else{player.speed_x  = 0;}
 
-//    if (IsButtonDown(BUTTON_MOVE_LEFT)){ player.acceleration_left = ACCELERATION;}
-//    else{player.acceleration_left = 0;}
-//    if (IsButtonDown(BUTTON_MOVE_RIGHT)){ player.acceleration_right = ACCELERATION;}
-//    else{player.acceleration_right = 0;}
 
     if(!_is_menu){
-        if(IsButtonDown(BUTTON_MMB) && free_cam){ //FREE CAMERA DRAG
+        if(IsButtonDown(BUTTON_RMB) && free_cam){ //FREE CAMERA DRAG
 
             camera.target.x -= scaled_mouse_dx;
             camera.target.y -= scaled_mouse_dy;
             SetMouseCursor(9);
-        }
-        else{SetMouseCursor(0);}
+        }else{SetMouseCursor(0);}
 
         if(IsButtonPressed(BUTTON_LMB)){ //TELEPORT
             player.x = scaled_mouse_x - player.width/2;
             player.y = scaled_mouse_y - player.height/2;
 
             player.falling_time = INITIAL_FALLING_TIME;
+            //player.air_time = 0;
             player.speed_x = 0;
             player.speed_y = 0;
         }

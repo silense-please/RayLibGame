@@ -9,13 +9,14 @@ using std::abs;
 
 
 // Global variables (use 'extern' if breaks)
-#define TARGET_FPS 60
+#define TARGET_FPS 120
 #define TILESIZE 64.0f
 
 //@ Pre-Underscore all global variables?
 //Pre-underscore-d variables are internal config flags(states) - modify them cautiously
 bool _is_borderless = false;
 bool _fps_lock = true;
+bool _vsync = true;
 bool _draw_debug_info = false;
 bool _is_paused = false;
 bool _is_menu = false;
@@ -30,7 +31,7 @@ Vector2 window_position;  //Position of game window on monitor in pixels
 // window resolution scale
 float scale_x = 1.0f;
 float scale_y = 1.0f;
-double delta_time = 0; //in-game physics time delta(could be paused or reversed or slowed)
+double delta_time = 0; //in-game physics time delta in seconds (could be paused or reversed or slowed)
 
 float scaled_mouse_x = 0;
 float scaled_mouse_y = 0;
@@ -41,7 +42,7 @@ const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config
 
 #define GAME_SPEED 1.0 // slow-mo
 #define ACCELERATION 8000.0f
-#define GRAVITATION 5000.0f
+#define GRAVITATION 4000.0f
 #define INITIAL_FALLING_TIME 0.00 // initial acceleration time of free fall - for faster falling
 
 
@@ -50,6 +51,7 @@ const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config
 string BUTTON_TOGGLE_BORDERLESS[MAX_BUTTON_BINDINGS]  {"KEY_F","GAMEPAD_BUTTON_RIGHT_FACE_LEFT"};
 string BUTTON_DEBUG_INFO[MAX_BUTTON_BINDINGS]  {"KEY_I"};
 string BUTTON_FRAMELOCK[MAX_BUTTON_BINDINGS]  {"KEY_L"};
+string BUTTON_VSYNC[MAX_BUTTON_BINDINGS]  {"KEY_V"};
 string BUTTON_FREECAM[MAX_BUTTON_BINDINGS]  {"KEY_R"};
 string BUTTON_PAUSE[MAX_BUTTON_BINDINGS]  {"KEY_ESCAPE", "GAMEPAD_BUTTON_MIDDLE_RIGHT"};
 
@@ -76,11 +78,16 @@ struct Player{
     float acceleration_left = 0;
     float acceleration_right = 0;
     float acceleration_up = 0; // maybe just horizontal acceleration
-    float acceleration_down = 0;
+    float acceleration_down = GRAVITATION;
     bool is_standing = false;
+    bool is_holding_jump = false;
+    bool is_jumping = false;
     bool is_levitating = false; //when player is not falling (noclip, etc) (no use now)
 
     double falling_time = 0; //@Rename? to time_of_fall
+    double air_time = 0;
+    double jump_input_buffer_time = 0;
+    double jump_input_hold_time = 0;
 };
 
 struct Game_Level{
@@ -128,7 +135,7 @@ void process_input(Player &player, Camera2D &camera);
 // Collision functions
 void show_collision(Player player, Game_Level level);
 void level_borders_collision(Player &player, Game_Level &level);
-void static_object_collision(Player &player, Game_Level level);
+void static_object_collision_by_speed(Player &player, Game_Level level);
 
 // Draw functions
 void draw_screen_center();
