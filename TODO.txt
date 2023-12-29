@@ -19,10 +19,10 @@ make good jumps https://www.youtube.com/watch?v=Mo1-sKYbks0 https://www.youtube.
 
 
 IN PROGRESS
-fix collision on corners, define jump forces, times, etc (and mb refactor jump code, its too messy)
+define jump forces, times, etc (and mb refactor jump code, its too messy)
 
 TODO - make test game (engine demo) - КОРОЧЕ ДЕЛАЙ УЖЕ МЕХАНИКИ ИГРЫ, А ВСЯКИЕ ВТОРОСТЕПЕННЫЕ МЕНЮ ПОТОМ
-sound system
+sound (witness) system (sorry)
 event triggers in level , text in level (somewhere between the sacred ...)
 animation
 make RPG-7

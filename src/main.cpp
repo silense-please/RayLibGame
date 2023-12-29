@@ -41,7 +41,7 @@ int main(void){
                                          {BTN_QUIT,  "QUIT",  (float)window_width/2 -125, 400, } };
 
     //InitAudioDevice();
-    //Music music = LoadMusicStream("Game_Data/nice_music.mp3");
+    //Music music = LoadMusicStream("Game_Data/test_music.mp3");
     //music.looping = false;
     //PlayMusicStream(music);
 
@@ -73,9 +73,10 @@ int main(void){
 
         /// Game Logic -------------------------------------------------------------------
         if(_is_paused) delta_time = 0;
-        else delta_time = GetFrameTime() * GAME_SPEED;
+        else delta_time = GetFrameTime() * GAME_SPEED; //@Add speed change ingame for debugging (with mousewheel)
+        //else delta_time = 0.008 * GAME_SPEED;//!!! THIS IS FOR BREAKPOINT DEBUGGING ONLY
 
-        if(!player.is_standing && !player.is_levitating && player.speed_y >= 0){ //&& player.speed_y >= 0
+        if(!player.is_standing && !player.is_levitating && player.speed_y >= 0){
             player.falling_time += delta_time;
         } else player.falling_time = INITIAL_FALLING_TIME;
 
@@ -85,21 +86,17 @@ int main(void){
         if (player.is_standing){player.is_holding_jump = false; player.is_jumping = false;player.jump_input_hold_time = 0;}
 
 
-
-
         player.speed_x += delta_time * (player.acceleration_right - player.acceleration_left);
         player.speed_y += delta_time * (player.acceleration_down - player.acceleration_up);
 
 
         static_object_collision_by_speed(player, current_level);
 
-
-        if (player.speed_y > 2000) {player.speed_y = 2000;} //@Define max speed
-
+        if (player.speed_y > 1600) {player.speed_y = 1600;} //@Define max speed
         player.x += player.speed_x * delta_time;
         player.y += player.speed_y * delta_time;
-        //static_object_collision_by_coordinates(player, current_level);
 
+        static_object_collision_by_coordinates(player, current_level);
 
         level_borders_collision(player, current_level);
 
@@ -115,6 +112,8 @@ int main(void){
 
             BeginMode2D(camera);{
                 DrawTextureEx(background_texture, (Vector2) {(float) 0, (float) 0}, 0, 3, WHITE);
+                //draw player collision box
+                if(_draw_debug_info)DrawRectangleRec((Rectangle){player.x, player.y, player.width, player.height}, RED);
                 DrawTextureEx(player_texture, (Vector2) {(float) player.x - player.width/2, (float) player.y}, 0, 1, WHITE);
                 static_objects_draw(current_level, ground_texture, 'G');
             } EndMode2D();

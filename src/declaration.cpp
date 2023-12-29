@@ -40,9 +40,9 @@ int active_gamepad = 0;
 const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config - not hooking for some reason
 
 
-#define GAME_SPEED 1.0 // slow-mo
+#define GAME_SPEED 1.0 // for slow-mo
 #define ACCELERATION 8000.0f
-#define GRAVITATION 4000.0f
+#define GRAVITATION 3500.0f
 #define INITIAL_FALLING_TIME 0.00 // initial acceleration time of free fall - for faster falling
 
 

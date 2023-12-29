@@ -412,7 +412,7 @@ void process_input(Player &player, Camera2D &camera){ //@Just put func contents 
     if (player.jump_input_buffer_time > 0){
         player.jump_input_buffer_time -= delta_time;
         // JUMP!
-        if((player.is_standing || player.air_time < 0.07) && !player.is_jumping) { //airtime needed for coyote time       @Define airtime
+        if((player.is_standing || player.air_time < 0.07) && !player.is_jumping) { //airtime needed for coyote time  @Define airtime
             player.speed_y = -1200;               //@Define jump force
             player.jump_input_buffer_time = 0;
             player.falling_time = 0;
@@ -422,11 +422,11 @@ void process_input(Player &player, Camera2D &camera){ //@Just put func contents 
         }
     }
     player.acceleration_down = GRAVITATION;
-    if (IsButtonDown(BUTTON_JUMP) && player.is_holding_jump && player.falling_time == 0){
+    if (IsButtonDown(BUTTON_JUMP) && player.is_holding_jump){
         player.jump_input_hold_time += delta_time;
-    }else if (player.is_jumping){
-        if (player.jump_input_hold_time < 0.09) player.jump_input_hold_time = 0.09;
-        player.acceleration_down = GRAVITATION* 0.27 / player.jump_input_hold_time;
+    }else if (player.is_jumping){ // When jump button is released
+        if (player.jump_input_hold_time < 0.09) player.jump_input_hold_time = 0.09; // MIN jump input.. (min jump)
+        player.acceleration_down = 0.75*GRAVITATION * (0.7 / player.jump_input_hold_time); //MAX jump input hold time (его можно посчитать?)
         player.is_holding_jump = false;
     }
 
@@ -437,7 +437,7 @@ void process_input(Player &player, Camera2D &camera){ //@Just put func contents 
 
 
     if(!_is_menu){
-        if(IsButtonDown(BUTTON_RMB) && free_cam){ //FREE CAMERA DRAG
+        if(IsButtonDown(BUTTON_MMB) && free_cam){ //FREE CAMERA DRAG
 
             camera.target.x -= scaled_mouse_dx;
             camera.target.y -= scaled_mouse_dy;
