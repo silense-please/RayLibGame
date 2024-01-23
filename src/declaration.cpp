@@ -41,9 +41,15 @@ const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config
 
 
 #define GAME_SPEED 1.0 // for slow-mo
-#define ACCELERATION 8000.0f
-#define GRAVITATION 3500.0f
+#define WALK_SPEED 800.0f
+#define GRAVITATION 2000.0f
 #define INITIAL_FALLING_TIME 0.00 // initial acceleration time of free fall - for faster falling
+#define JUMP_INPUT_BUFFER_TIME 0.07
+#define COYOTE_TIME 0.07
+#define JUMP_POWER 1000
+#define MIN_JUMP_INPUT_HOLD_TIME 0.15
+#define MAX_JUMP_INPUT_HOLD_TIME 0.7
+#define MAX_FALL_SPEED 1600.0
 
 
 //Input bindings - be wary of same key duplicating to multiple buttons
@@ -130,12 +136,13 @@ bool IsButtonReleased(string buttons[MAX_BUTTON_BINDINGS]);
 bool IsButtonUp(string buttons[MAX_BUTTON_BINDINGS]);
 bool IsButtonDown(string buttons[MAX_BUTTON_BINDINGS]);
 void switch_active_gamepad();
-void process_input(Player &player, Camera2D &camera);
+void process_input(Player &player, Camera2D &camera, Game_Level current_level);
 
 // Collision functions
 void show_collision(Player player, Game_Level level);
 void level_borders_collision(Player &player, Game_Level &level);
 void static_object_collision_by_speed(Player &player, Game_Level level);
+void static_object_collision_by_coordinates(Player &player, Game_Level level);
 
 // Draw functions
 void draw_screen_center();

@@ -19,7 +19,6 @@ make good jumps https://www.youtube.com/watch?v=Mo1-sKYbks0 https://www.youtube.
 
 
 IN PROGRESS
-define jump forces, times, etc (and mb refactor jump code, its too messy)
 
 TODO - make test game (engine demo) - КОРОЧЕ ДЕЛАЙ УЖЕ МЕХАНИКИ ИГРЫ, А ВСЯКИЕ ВТОРОСТЕПЕННЫЕ МЕНЮ ПОТОМ
 sound (witness) system (sorry)
@@ -32,12 +31,12 @@ Make button input config (txt) file and load bindings from it
 Cleanup after "engine v1" done - sweep comments, restructure, fill declaration.cpp, make "debug" and release game mode e.t.c
 compile release build and test it on VM and then on dimkanet's PC
 
-mb collisions can be improved (the corners)
+rebuild(refactor) player accelerations to the real vectors
+mb collisions can be improved (collide by speed vectors) (the corners, step on platform if almost jumped high enough)
 Texture loading and unloading system and characters' ids system to link them with texture
 different game "scenes" - levels basically
 
 pull out Raylib's update and draw (delta)time alike GetFrameTime() to measure performance costs (from rcore.c)
-rebuild palyer accelerations to the real vectors
 draw text stats&metrics for debug
 draw player collision box in debug mode
 error handling and output - "falied to load ..." (investigate what is try/catch)

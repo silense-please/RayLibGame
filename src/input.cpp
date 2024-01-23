@@ -386,12 +386,15 @@ void switch_active_gamepad(){  //@Hardcoded - should be options menu switch
 }
 
 // All user input
-void process_input(Player &player, Camera2D &camera){ //@Just put func contents in main?
-    if(IsButtonPressed(BUTTON_PAUSE)){ _is_menu = ! _is_menu; _is_paused = !_is_paused;}
+void process_input(Player &player, Camera2D &camera, Game_Level current_level) { //@Just put func contents in main?
+    if (IsButtonPressed(BUTTON_PAUSE)) {
+        _is_menu = !_is_menu;
+        _is_paused = !_is_paused;
+    }
 
     switch_active_gamepad();
-    scaled_mouse_x = (GetMouseX()/scale_x) / camera.zoom  + (camera.target.x  - camera.offset.x/camera.zoom);
-    scaled_mouse_y = (GetMouseY()/scale_y) / camera.zoom  + (camera.target.y  - camera.offset.y/camera.zoom);
+    scaled_mouse_x = (GetMouseX() / scale_x) / camera.zoom + (camera.target.x - camera.offset.x / camera.zoom);
+    scaled_mouse_y = (GetMouseY() / scale_y) / camera.zoom + (camera.target.y - camera.offset.y / camera.zoom);
 
     Vector2 mouse_delta = GetMouseDelta();
     float scaled_mouse_dx = mouse_delta.x / scale_x / camera.zoom;
@@ -405,55 +408,58 @@ void process_input(Player &player, Camera2D &camera){ //@Just put func contents 
     toggle_fullscreen(); //@Unfinished
     apply_screen_scale();
 
-    /// JUMP
-    if (IsButtonPressed(BUTTON_JUMP)){
-        player.jump_input_buffer_time = 0.05;     //@Define
-    }
-    if (player.jump_input_buffer_time > 0){
-        player.jump_input_buffer_time -= delta_time;
-        // JUMP!
-        if((player.is_standing || player.air_time < 0.07) && !player.is_jumping) { //airtime needed for coyote time  @Define airtime
-            player.speed_y = -1200;               //@Define jump force
-            player.jump_input_buffer_time = 0;
-            player.falling_time = 0;
-            player.is_standing = false;
-            player.is_holding_jump = true;
-            player.is_jumping = true;
+    { /// JUMP
+        if (IsButtonPressed(BUTTON_JUMP)) {
+            player.jump_input_buffer_time = JUMP_INPUT_BUFFER_TIME;
+        }
+        if (player.jump_input_buffer_time > 0) {
+            player.jump_input_buffer_time -= delta_time;
+            // JUMP!
+            if ((player.is_standing || player.air_time < COYOTE_TIME) && !player.is_jumping) {
+                player.speed_y = -JUMP_POWER;
+                player.jump_input_buffer_time = 0;
+                player.falling_time = INITIAL_FALLING_TIME;
+                player.is_standing = false;
+                player.is_holding_jump = true;
+                player.is_jumping = true;
+            }
+        }
+        player.acceleration_down = GRAVITATION;
+        if (IsButtonDown(BUTTON_JUMP) && player.is_holding_jump) {
+            player.jump_input_hold_time += delta_time;
+        } else if (player.is_jumping) { // When jump button is released
+            if (player.jump_input_hold_time < MIN_JUMP_INPUT_HOLD_TIME)
+                player.jump_input_hold_time = MIN_JUMP_INPUT_HOLD_TIME;
+            player.acceleration_down = GRAVITATION * 0.8 * (MAX_JUMP_INPUT_HOLD_TIME / player.jump_input_hold_time);
+            player.is_holding_jump = false;
         }
     }
-    player.acceleration_down = GRAVITATION;
-    if (IsButtonDown(BUTTON_JUMP) && player.is_holding_jump){
-        player.jump_input_hold_time += delta_time;
-    }else if (player.is_jumping){ // When jump button is released
-        if (player.jump_input_hold_time < 0.09) player.jump_input_hold_time = 0.09; // MIN jump input.. (min jump)
-        player.acceleration_down = 0.75*GRAVITATION * (0.7 / player.jump_input_hold_time); //MAX jump input hold time (его можно посчитать?)
-        player.is_holding_jump = false;
-    }
+
 
     /// WALK
-    if (IsButtonDown(BUTTON_MOVE_LEFT)){ player.speed_x = -800;}  //@define walking speed
-    else if (IsButtonDown(BUTTON_MOVE_RIGHT)){ player.speed_x = 800;}
-    else{player.speed_x  = 0;}
+    if (IsButtonDown(BUTTON_MOVE_LEFT)) { player.speed_x = -WALK_SPEED; }
+    else if (IsButtonDown(BUTTON_MOVE_RIGHT)) { player.speed_x = WALK_SPEED; }
+    else { player.speed_x = 0; }
 
 
-    if(!_is_menu){
-        if(IsButtonDown(BUTTON_MMB) && free_cam){ //FREE CAMERA DRAG
+    if (!_is_menu) {
+        if (IsButtonDown(BUTTON_MMB) && free_cam) { //FREE CAMERA DRAG
 
             camera.target.x -= scaled_mouse_dx;
             camera.target.y -= scaled_mouse_dy;
             SetMouseCursor(9);
-        }else{SetMouseCursor(0);}
+        } else { SetMouseCursor(0); }
 
-        if(IsButtonPressed(BUTTON_LMB)){ //TELEPORT
-            player.x = scaled_mouse_x - player.width/2;
-            player.y = scaled_mouse_y - player.height/2;
+        if (IsButtonPressed(BUTTON_LMB)) { //TELEPORT
+            player.x = scaled_mouse_x - player.width / 2;
+            player.y = scaled_mouse_y - player.height / 2;
 
             player.falling_time = INITIAL_FALLING_TIME;
             //player.air_time = 0;
             player.speed_x = 0;
             player.speed_y = 0;
         }
-        if(IsButtonPressed(BUTTON_FREECAM)) { //FREE CAMERA TOGGLE
+        if (IsButtonPressed(BUTTON_FREECAM)) { //FREE CAMERA TOGGLE
             if (free_cam) camera.zoom = 1; //@Add default zoom later
             free_cam = !free_cam;
         }

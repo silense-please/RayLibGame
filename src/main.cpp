@@ -8,7 +8,7 @@
 
 int main(void){
 
-    // Initialization
+    /// Initialization
     SetConfigFlags(FLAG_WINDOW_RESIZABLE); // |FLAG_VSYNC_HINT);
     InitWindow(window_width, window_height, "RAYLIB-DEMO");
     //SetMouseCursor(0);
@@ -48,13 +48,14 @@ int main(void){
 
     bool close_window = 0;
 
-    /// Main game loop
-    while (!WindowShouldClose() && !close_window){
+    while (!WindowShouldClose() && !close_window){ /// Main game loop
         //UpdateMusicStream(music); // PLAY MUSIC
 
-        /// Process Input ----------------------------------------------------------------
-        process_input(player, camera);
+        if(_is_paused) delta_time = 0;
+        else delta_time = GetFrameTime() * GAME_SPEED; //@Add speed change ingame for debugging (with mousewheel)
+        //else delta_time = 0.008 * GAME_SPEED;//!!! THIS IS FOR BREAKPOINT DEBUGGING ONLY
 
+        /// Process Input
         if(_is_menu){
             for (int i = 0; i < MENU_BUTTONS; ++i) {
                 if (CheckCollisionPointRec((Vector2) {GetMouseX() / scale_x, GetMouseY() / scale_y},
@@ -71,43 +72,51 @@ int main(void){
             }
         }
 
-        /// Game Logic -------------------------------------------------------------------
-        if(_is_paused) delta_time = 0;
-        else delta_time = GetFrameTime() * GAME_SPEED; //@Add speed change ingame for debugging (with mousewheel)
-        //else delta_time = 0.008 * GAME_SPEED;//!!! THIS IS FOR BREAKPOINT DEBUGGING ONLY
 
-        if(!player.is_standing && !player.is_levitating && player.speed_y >= 0){
-            player.falling_time += delta_time;
-        } else player.falling_time = INITIAL_FALLING_TIME;
+        process_input(player, camera, current_level);
 
-        if (!player.is_standing) player.air_time += delta_time;
-        else player.air_time = 0;
+        { ///APPLY INPUTS TO PLAYER
+            if (!player.is_standing && !player.is_levitating && player.speed_y >= 0) {
+                player.falling_time += delta_time;
+            } else player.falling_time = INITIAL_FALLING_TIME;
 
-        if (player.is_standing){player.is_holding_jump = false; player.is_jumping = false;player.jump_input_hold_time = 0;}
+            if (!player.is_standing) player.air_time += delta_time;
+            else player.air_time = 0;
 
-
-        player.speed_x += delta_time * (player.acceleration_right - player.acceleration_left);
-        player.speed_y += delta_time * (player.acceleration_down - player.acceleration_up);
-
-
-        static_object_collision_by_speed(player, current_level);
-
-        if (player.speed_y > 1600) {player.speed_y = 1600;} //@Define max speed
-        player.x += player.speed_x * delta_time;
-        player.y += player.speed_y * delta_time;
-
-        static_object_collision_by_coordinates(player, current_level);
-
-        level_borders_collision(player, current_level);
+            if (player.is_standing) {
+                player.is_holding_jump = false;
+                player.is_jumping = false;
+                player.jump_input_hold_time = 0;
+            }
 
 
-        camera.zoom += ((float)GetMouseWheelMove()*0.1f * camera.zoom);
+            player.speed_x += delta_time * (player.acceleration_right - player.acceleration_left);
+            player.speed_y += delta_time * (player.acceleration_down - player.acceleration_up);
+
+
+            static_object_collision_by_speed(player, current_level);
+
+            if (player.speed_y > MAX_FALL_SPEED) { player.speed_y = MAX_FALL_SPEED; }
+            player.x += player.speed_x * delta_time;
+            player.y += player.speed_y * delta_time;
+
+            static_object_collision_by_coordinates(player, current_level);
+
+            level_borders_collision(player, current_level);
+
+        }
+
+        camera.zoom += ((float)GetMouseWheelMove() * (0.1f*camera.zoom));
         if(!free_cam) // Camera just follows player for now
             camera.target = (Vector2){ player.x + player.width/2, player.y + player.height/2};
 
+        /// Game Logic
+
+        // stuff like sound, event triggers, animations will be here (everything that isn't Input or Draw)
 
 
-        BeginTextureMode(target);{ /// Draw everything to target texture to enable window scaling/stretching
+        /// Draw    everything to target texture to enable window scaling/stretching
+        BeginTextureMode(target);{
             ClearBackground(LIGHTGRAY);
 
             BeginMode2D(camera);{
@@ -152,7 +161,7 @@ int main(void){
 
     } ///---Main loop
 
-    /// De-Initialization -------------------------------------------------------------------
+
     //UnloadMusicStream(music);
     //CloseAudioDevice();
     UnloadTexture(player_texture);
@@ -160,6 +169,7 @@ int main(void){
     UnloadTexture(background_texture);
     UnloadRenderTexture(target);
     CloseWindow();
+
     printf("Errors: %i", total_errors);
     return 0;
 }
