@@ -13,8 +13,9 @@ int main(void){
     InitWindow(window_width, window_height, "RAYLIB-DEMO");
     //SetMouseCursor(0);
 
-    // Render texture initialization - to hold the rendering result be able to resize it
+    // Render texture initialization - to hold the rendering result and be able to resize it
     RenderTexture2D target = LoadRenderTexture(window_width, window_height);
+    toggle_borderless(); // Set borderless at startup
 
     Image game_icon = LoadImage("Game_Data/player_64p.png");
     SetWindowIcon(game_icon);
@@ -22,19 +23,26 @@ int main(void){
     SetWindowState(FLAG_VSYNC_HINT);
     SetTargetFPS(120);
 
+    // @ Add this to the player struct?  - Anyway, group this
     Texture2D player_texture = LoadTexture("Game_Data/player_64p.png");
+
+    Texture2D player_run_anim = LoadTexture("Game_Data/player64_run.png");
+    Texture2D player_jump_anim = LoadTexture("Game_Data/player64_jump.png");
+    Texture2D player_fall_anim = LoadTexture("Game_Data/player64_fall.png");
+    Texture2D player_idle_anim = LoadTexture("Game_Data/player64_idle.png");
+
+
     Texture2D background_texture = LoadTexture("Game_Data/background.png");
     Texture2D ground_texture = LoadTexture("Game_Data/ground.png");
 
-    Player player;
 
+    Player player;
     Game_Level current_level;
     load_level(current_level);
     load_player_spawn(current_level, player);
 
     Camera2D camera = {(Vector2){(float)window_width /2, (float)window_height /2},
                        (Vector2){ (float)window_width /2, (float)window_height /2 },0,1};
-
 
     const int MENU_BUTTONS = 2;
     Menu_Button menu_btns[MENU_BUTTONS] {{BTN_RESUME,"RESUME",(float)window_width/2 -125, 200, },
@@ -45,14 +53,13 @@ int main(void){
     //music.looping = false;
     //PlayMusicStream(music);
 
-
     bool close_window = 0;
 
     while (!WindowShouldClose() && !close_window){ /// Main game loop
         //UpdateMusicStream(music); // PLAY MUSIC
 
         if(_is_paused) delta_time = 0;
-        else delta_time = GetFrameTime() * GAME_SPEED; //@Add speed change ingame for debugging (with mousewheel)
+        else delta_time = GetFrameTime() * GAME_SPEED *0.5; //@Add speed change ingame for debugging (with mousewheel)
         //else delta_time = 0.008 * GAME_SPEED;//!!! THIS IS FOR BREAKPOINT DEBUGGING ONLY
 
         /// Process Input
@@ -106,16 +113,18 @@ int main(void){
 
         }
 
+
         camera.zoom += ((float)GetMouseWheelMove() * (0.1f*camera.zoom));
         if(!free_cam) // Camera just follows player for now
             camera.target = (Vector2){ player.x + player.width/2, player.y + player.height/2};
 
         /// Game Logic
 
+
         // stuff like sound, event triggers, animations will be here (everything that isn't Input or Draw)
 
 
-        /// Draw    everything to target texture to enable window scaling/stretching
+        /// Draw everything to target texture to enable window scaling/stretching
         BeginTextureMode(target);{
             ClearBackground(LIGHTGRAY);
 
@@ -123,7 +132,20 @@ int main(void){
                 DrawTextureEx(background_texture, (Vector2) {(float) 0, (float) 0}, 0, 3, WHITE);
                 //draw player collision box
                 if(_draw_debug_info)DrawRectangleRec((Rectangle){player.x, player.y, player.width, player.height}, RED);
-                DrawTextureEx(player_texture, (Vector2) {(float) player.x - player.width/2, (float) player.y}, 0, 1, WHITE);
+
+                { // Draw player func
+                    if(player.speed_x == 0 && player.speed_y == 0) { // "is_idle"
+                        draw_player_animation(player, player_idle_anim, 0.4);
+                    }else if(abs(player.speed_x) > 0 && player.speed_y == 0){// "is_running"
+                        draw_player_animation(player, player_run_anim,  0.07);
+                    }else if(player.speed_y < 0){//is jumping
+                        draw_player_animation(player, player_jump_anim, 0.1);
+                    }else { //is falling
+                        draw_player_animation(player, player_fall_anim, 0.1);
+                    }
+                }
+
+
                 static_objects_draw(current_level, ground_texture, 'G');
             } EndMode2D();
 
@@ -154,7 +176,6 @@ int main(void){
             if (free_cam) DrawText("FREE CAMREA", 700, 100, 40, DARKGREEN);
             show_collision(player,current_level); //@Temporary - maybe move to draw_debug_info after collision system is finished
 
-            // -------------
             DrawFPS(10,10);
         } EndTextureMode();
         draw_target_texture(target);

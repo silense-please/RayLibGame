@@ -16,6 +16,7 @@ camera - side-scrolling
 pause system (and UI)
  gravity and jumps
 make good jumps https://www.youtube.com/watch?v=Mo1-sKYbks0 https://www.youtube.com/watch?v=7KiK0Aqtmzc&t=216s
+basic animation system
 
 
 IN PROGRESS
@@ -23,7 +24,6 @@ IN PROGRESS
 TODO - make test game (engine demo) - КОРОЧЕ ДЕЛАЙ УЖЕ МЕХАНИКИ ИГРЫ, А ВСЯКИЕ ВТОРОСТЕПЕННЫЕ МЕНЮ ПОТОМ
 sound (witness) system (sorry)
 event triggers in level , text in level (somewhere between the sacred ...)
-animation
 make RPG-7
 debug mode on/off switch
 
@@ -31,31 +31,33 @@ Make button input config (txt) file and load bindings from it
 Cleanup after "engine v1" done - sweep comments, restructure, fill declaration.cpp, make "debug" and release game mode e.t.c
 compile release build and test it on VM and then on dimkanet's PC
 
+add hot reloading system via dlls for debugging (TSoding)
 rebuild(refactor) player accelerations to the real vectors
 mb collisions can be improved (collide by speed vectors) (the corners, step on platform if almost jumped high enough)
-Texture loading and unloading system and characters' ids system to link them with texture
+Texture loading and unloading system (or just a separate file of loads) and characters' ids system to link them with texture
 different game "scenes" - levels basically
 
 pull out Raylib's update and draw (delta)time alike GetFrameTime() to measure performance costs (from rcore.c)
 draw text stats&metrics for debug
 draw player collision box in debug mode
 error handling and output - "falied to load ..." (investigate what is try/catch)
-write tests (unittests i guess)
+write tests (unittests i guess (do I need them?))
 saves - game state (serialization?)
 timestamps - UPS - game logic(physics etc) has to update at fixed rate (60 per sec) - not necessary
     (implement using " if(deltatime==1/60sec) -> do game logic" ???)
 make custom delta_time for game logic (to be able to invert ime without breaking gameloop)
 move player coordinates to the center of body?
-refactor 1 time used functions into { "blocks of code" and also separate standalone blocks with {} - for code clarity
+refactor "1 time used functions" into { "blocks of code" and also separate standalone blocks with {} - for code clarity
                                     }
 maybe consider more jump help like edge detection -  https://youtu.be/3sWTzMsmdx8?si=aEuX8x2OJ8Y_qTnX&t=109
                                                     https://youtu.be/Bsy8pknHc0M?si=3_uyQANwHjnAYpNt&t=157
+find out how to reverse sounds (without duplicating every sound in reverse and swapping them - it will be a nightmare)
 
 
 try level editors - LDtk, Tiled
 try OpenGL integration
 try online sockets
-try Box2D physics
+try Box2D physics (or Chipmunk2D)
 maybe make rez options (with buttons only for now)
 refctor - maybe write corresponding declaration in it's modules - draw, load, e.t.c (to reduce coupling)
 try to "static link mingw32 libraries" i guess - put all dll libs into exe file for release/shipping
@@ -65,10 +67,15 @@ Problems:
    -Screen tearing occurs when Vsync is off - I cant find VRR option in OpenGL - to render any fps(1000) without tearing
         (e.g. in Hollow Knight there is no tearing no matter fps: 30 - 300, vsync off, on second 60Hz monitor)
         I kinda want game to run at 500 fps without tearing (or ANY issues), but i guess its okay to just Vsync it
-   -Window crashes when audio output device is changed (miniaudio.h "ma_IAudioClient_Start" - line 20258)
+   -Window crashes when audio output device is changed (miniaudio.h "ma_IAudioClient_Start" - line ~20258)
         miniaudio crashes (in any version) only in raylib - miniaudio (github page) examples work just fine ???
         need to investigate further in raylib - in InitAudioDevice() i guess (need to learn how to debug properly)
-        (try to use miniaudio in game window without raylib's methods such as InitAudio) - try out this bug in raylib 5.0
+        (try to use miniaudio in game window without raylib's methods such as InitAudio) (raylib 5.0 still crashes)
+        https://github.com/mackron/miniaudio/issues/764
+        In miniaudio default device changing in: ma_device_reinit__wasapi() -> ma_device_init_internal__wasapi()
+        ma_device_audio_thread__default_read_write() - main loop for audio
+        ma_CoCreateInstance() in ma_context_get_MMDevice__wasapi() FAILS (dig deeper)
+        !!!FIXED(workaround) - https://github.com/karl-zylinski/raylib/commit/7a38578c89baf5f3c1d2e20250757b0301dc2643?diff=unified&w=1
         
    -Audio system is broken - on 1500+ fps there is a small digital noise regardless of volume, even if muted - WTF
    -Fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)

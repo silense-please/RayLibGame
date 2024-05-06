@@ -66,8 +66,23 @@ void draw_target_texture(RenderTexture2D& target){
     BeginDrawing();
     ClearBackground(LIGHTGRAY);
     // Draw render texture to screen, properly scaled
-    DrawTexturePro(target.texture, (Rectangle){ 0.0f, 0.0f, (float)target.texture.width, (float)-target.texture.height },
+    DrawTexturePro(target.texture, (Rectangle){ 0.0f, 0.0f, (float)target.texture.width, (float)-target.texture.height},
                    (Rectangle){(GetScreenWidth() - ((float)initial_window_width*scale_x))*0.5f, (GetScreenHeight() - ((float)initial_window_height*scale_y))*0.5f,
                                (float)initial_window_width*scale_x, (float)initial_window_height*scale_y }, (Vector2){ 0, 0 }, 0.0f, WHITE);
     EndDrawing();
+
+}
+
+// Draw animation from one row spritesheet
+//frame_duration is animation speed
+void draw_player_animation(Player player, Texture animation, float frame_duration){
+    int frames = animation.width / TILESIZE;
+    bool flip = player.direction; //minus(-) in source's width mirrors image
+    static int frame = 0;
+    static float timer = 0;
+    timer += delta_time;
+    if (frame > frames-1) frame = 0;
+    Rectangle run_frame_rec = {(float)frame*(float)animation.width / frames,0, (float)animation.width / frames *(flip? 1: -1), (float)animation.height};
+    DrawTextureRec(animation,run_frame_rec , (Vector2) {(float) player.x - player.width/2, (float) player.y}, WHITE);
+    if (timer >= frame_duration){frame ++; timer = 0;}
 }

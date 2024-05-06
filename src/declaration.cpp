@@ -40,7 +40,7 @@ int active_gamepad = 0;
 const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config - not hooking for some reason
 
 
-#define GAME_SPEED 1.0 // for slow-mo
+#define GAME_SPEED 1 // for slow-mo
 #define WALK_SPEED 800.0f
 #define GRAVITATION 2000.0f
 #define INITIAL_FALLING_TIME 0.00 // initial acceleration time of free fall - for faster falling
@@ -85,10 +85,14 @@ struct Player{
     float acceleration_right = 0;
     float acceleration_up = 0; // maybe just horizontal acceleration
     float acceleration_down = GRAVITATION;
-    bool is_standing = false;
+    bool direction = 1; //  horizontal image flip - left = 0, right = 1
+
+    bool is_standing = false; //standing on the ground
     bool is_holding_jump = false;
     bool is_jumping = false;
     bool is_levitating = false; //when player is not falling (noclip, etc) (no use now)
+
+    bool is_running = false;
 
     double falling_time = 0; //@Rename? to time_of_fall
     double air_time = 0;

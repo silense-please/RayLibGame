@@ -436,10 +436,10 @@ void process_input(Player &player, Camera2D &camera, Game_Level current_level) {
     }
 
 
-    /// WALK
-    if (IsButtonDown(BUTTON_MOVE_LEFT)) { player.speed_x = -WALK_SPEED; }
-    else if (IsButtonDown(BUTTON_MOVE_RIGHT)) { player.speed_x = WALK_SPEED; }
-    else { player.speed_x = 0; }
+    /// RUN
+    if (IsButtonDown(BUTTON_MOVE_LEFT)) { player.speed_x = -WALK_SPEED; player.is_running = true; player.direction=0;}
+    else if (IsButtonDown(BUTTON_MOVE_RIGHT)) { player.speed_x = WALK_SPEED; player.is_running = true; player.direction=1;}
+    else { player.speed_x = 0; player.is_running = false;}
 
 
     if (!_is_menu) {
