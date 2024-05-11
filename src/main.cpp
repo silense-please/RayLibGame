@@ -48,15 +48,15 @@ int main(void){
     Menu_Button menu_btns[MENU_BUTTONS] {{BTN_RESUME,"RESUME",(float)window_width/2 -125, 200, },
                                          {BTN_QUIT,  "QUIT",  (float)window_width/2 -125, 400, } };
 
-    //InitAudioDevice();
-    //Music music = LoadMusicStream("Game_Data/test_music.mp3");
-    //music.looping = false;
-    //PlayMusicStream(music);
+    InitAudioDevice();
+    Music music = LoadMusicStream("Game_Data/test_music.mp3");
+    music.looping = false;
+    PlayMusicStream(music);
 
     bool close_window = 0;
 
     while (!WindowShouldClose() && !close_window){ /// Main game loop
-        //UpdateMusicStream(music); // PLAY MUSIC
+        UpdateMusicStream(music); // PLAY MUSIC
 
         if(_is_paused) delta_time = 0;
         else delta_time = GetFrameTime() * GAME_SPEED *0.5; //@Add speed change ingame for debugging (with mousewheel)

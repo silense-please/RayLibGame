@@ -20,9 +20,9 @@ basic animation system
 
 
 IN PROGRESS
+sound (witness) system (sorry)
 
 TODO - make test game (engine demo) - КОРОЧЕ ДЕЛАЙ УЖЕ МЕХАНИКИ ИГРЫ, А ВСЯКИЕ ВТОРОСТЕПЕННЫЕ МЕНЮ ПОТОМ
-sound (witness) system (sorry)
 event triggers in level , text in level (somewhere between the sacred ...)
 make RPG-7
 debug mode on/off switch
@@ -61,6 +61,7 @@ try Box2D physics (or Chipmunk2D)
 maybe make rez options (with buttons only for now)
 refctor - maybe write corresponding declaration in it's modules - draw, load, e.t.c (to reduce coupling)
 try to "static link mingw32 libraries" i guess - put all dll libs into exe file for release/shipping
+    https://youtu.be/fVJHmGPfsEk?si=919unMBLcmKsRhUf&t=470
 
 
 Problems:

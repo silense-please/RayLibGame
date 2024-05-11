@@ -4,4 +4,3 @@
 /.idea
 /raylib/*
 !/raylib/src
-/raylib/src/external
