@@ -1611,7 +1611,7 @@ int GetFPS(void)
 }
 
 // Get time in seconds for last frame drawn (delta time)
-float GetFrameTime(void)
+double GetFrameTime(void)
 {
     return (float)CORE.Time.frame;
 }
