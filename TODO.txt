@@ -1,5 +1,4 @@
-
-DONE
+--DONE
 mb array[10] to count average fps
 test button inputs and gamepad - working
 make fps independent game loop (with sf::Clock i guess)
@@ -19,10 +18,10 @@ make good jumps https://www.youtube.com/watch?v=Mo1-sKYbks0 https://www.youtube.
 basic animation system
 
 
-IN PROGRESS
+--IN PROGRESS
 sound (witness) system (sorry)
 
-TODO - make test game (engine demo) - КОРОЧЕ ДЕЛАЙ УЖЕ МЕХАНИКИ ИГРЫ, А ВСЯКИЕ ВТОРОСТЕПЕННЫЕ МЕНЮ ПОТОМ
+--TODO - make test game (engine demo) - КОРОЧЕ ДЕЛАЙ УЖЕ МЕХАНИКИ ИГРЫ, А ВСЯКИЕ ВТОРОСТЕПЕННЫЕ МЕНЮ ПОТОМ
 event triggers in level , text in level (somewhere between the sacred ...)
 make RPG-7
 debug mode on/off switch
@@ -30,6 +29,16 @@ debug mode on/off switch
 Make button input config (txt) file and load bindings from it
 Cleanup after "engine v1" done - sweep comments, restructure, fill declaration.cpp, make "debug" and release game mode e.t.c
 compile release build and test it on VM and then on dimkanet's PC
+
+--REVERSE
+    objects
+    player
+    audio
+
+--AUDIO PROBLEM - HOW TO REVERSE IT ? - ffmpeg?, SDL?, miniaudio low level API? (scary), BASS audio lib, RubberBand
+better not to reverse audio, but play it with changed pitch(a.k.a tempo) to -1, so we can also slow down or speed up sound
+    almost everywhere (incl raylib) pitch minimum is >0 so they cant play sounds in reverse
+
 
 add hot reloading system via dlls for debugging (TSoding)
 rebuild(refactor) player accelerations to the real vectors
@@ -39,7 +48,6 @@ different game "scenes" - levels basically
 
 pull out Raylib's update and draw (delta)time alike GetFrameTime() to measure performance costs (from rcore.c)
 draw text stats&metrics for debug
-draw player collision box in debug mode
 error handling and output - "falied to load ..." (investigate what is try/catch)
 write tests (unittests i guess (do I need them?))
 saves - game state (serialization?)
@@ -53,7 +61,6 @@ maybe consider more jump help like edge detection -  https://youtu.be/3sWTzMsmdx
                                                     https://youtu.be/Bsy8pknHc0M?si=3_uyQANwHjnAYpNt&t=157
 find out how to reverse sounds (without duplicating every sound in reverse and swapping them - it will be a nightmare)
 
-
 try level editors - LDtk, Tiled
 try OpenGL integration
 try online sockets
@@ -62,9 +69,10 @@ maybe make rez options (with buttons only for now)
 refctor - maybe write corresponding declaration in it's modules - draw, load, e.t.c (to reduce coupling)
 try to "static link mingw32 libraries" i guess - put all dll libs into exe file for release/shipping
     https://youtu.be/fVJHmGPfsEk?si=919unMBLcmKsRhUf&t=470
+try raylib SDL backend (for better fullscreening )- setup - https://youtu.be/CfeHFIP_xEI?si=SpnQzOm76Wk5GqeW&t=994
 
 
-Problems:
+--Problems:
    -Screen tearing occurs when Vsync is off - I cant find VRR option in OpenGL - to render any fps(1000) without tearing
         (e.g. in Hollow Knight there is no tearing no matter fps: 30 - 300, vsync off, on second 60Hz monitor)
         I kinda want game to run at 500 fps without tearing (or ANY issues), but i guess its okay to just Vsync it

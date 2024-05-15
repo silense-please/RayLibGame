@@ -56,7 +56,7 @@ int main(void){
     bool close_window = 0;
 
     while (!WindowShouldClose() && !close_window){ /// Main game loop
-        UpdateMusicStream(music); // PLAY MUSIC
+        //UpdateMusicStream(music); // PLAY MUSIC
 
         if(_is_paused) delta_time = 0;
         else delta_time = GetFrameTime() * GAME_SPEED *0.5; //@Add speed change ingame for debugging (with mousewheel)

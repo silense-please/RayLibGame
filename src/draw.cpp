@@ -77,12 +77,12 @@ void draw_target_texture(RenderTexture2D& target){
 //frame_duration is animation speed
 void draw_player_animation(Player player, Texture animation, float frame_duration){
     int frames = animation.width / TILESIZE;
-    bool flip = player.direction; //minus(-) in source's width mirrors image
+    bool flip = player.facing_left; //minus(-) in source's width mirrors image
     static int frame = 0;
     static float timer = 0;
     timer += delta_time;
     if (frame > frames-1) frame = 0;
-    Rectangle run_frame_rec = {(float)frame*(float)animation.width / frames,0, (float)animation.width / frames *(flip? 1: -1), (float)animation.height};
+    Rectangle run_frame_rec = {(float)frame*(float)animation.width / frames,0, (float)animation.width / frames *(flip? -1: 1), (float)animation.height};
     DrawTextureRec(animation,run_frame_rec , (Vector2) {(float) player.x - player.width/2, (float) player.y}, WHITE);
     if (timer >= frame_duration){frame ++; timer = 0;}
 }

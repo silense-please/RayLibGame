@@ -437,8 +437,8 @@ void process_input(Player &player, Camera2D &camera, Game_Level current_level) {
 
 
     /// RUN
-    if (IsButtonDown(BUTTON_MOVE_LEFT)) { player.speed_x = -WALK_SPEED; player.is_running = true; player.direction=0;}
-    else if (IsButtonDown(BUTTON_MOVE_RIGHT)) { player.speed_x = WALK_SPEED; player.is_running = true; player.direction=1;}
+    if (IsButtonDown(BUTTON_MOVE_LEFT)) { player.speed_x = -WALK_SPEED; player.is_running = true; player.facing_left=1;}
+    else if (IsButtonDown(BUTTON_MOVE_RIGHT)) { player.speed_x = WALK_SPEED; player.is_running = true; player.facing_left=0;}
     else { player.speed_x = 0; player.is_running = false;}
 
 

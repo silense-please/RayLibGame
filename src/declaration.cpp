@@ -85,7 +85,7 @@ struct Player{
     float acceleration_right = 0;
     float acceleration_up = 0; // maybe just horizontal acceleration
     float acceleration_down = GRAVITATION;
-    bool direction = 1; //  horizontal image flip - left = 0, right = 1
+    bool facing_left = 0; //  horizontal image flip (direction)
 
     bool is_standing = false; //standing on the ground
     bool is_holding_jump = false;
