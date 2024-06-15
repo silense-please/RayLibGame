@@ -2,5 +2,9 @@
 /cmake-build-release/*
 !/cmake-build-debug/Game_data/
 /.idea
+
 /raylib/*
 !/raylib/src
+!/raylib/LICENSE
+!/raylib/README.md
+# Maybe should add raylib's gitignore later if something breaks, although it's fine now.

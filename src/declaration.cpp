@@ -1,4 +1,4 @@
-// @ sign - tags & reminders to cleanup\change the code later
+// "@" sign - tags & reminders to cleanup\change the code later
 
 #include "raylib.h"
 #include <fstream>
@@ -12,6 +12,13 @@ using std::abs;
 #define TARGET_FPS 120
 #define TILESIZE 64.0f
 
+#define MAKE_STRING(VARIABLE) (#VARIABLE) //STRINGIZING - this is just for convenicense of printing, for debugging, MIGHT BE DANGEROUS
+#define PRINT_INTEGER(VAR) ("%s: %d\n"), (MAKE_STRING(VAR)), (VAR)   // prints name of variable and it's int value
+#define PRINT_FLOAT(VAR)   ("%s: %f\n"), (MAKE_STRING(VAR)), (VAR)  // prints name of variable and it's float value
+//DrawText(TextFormat("standing: %d", player.is_standing), 10, 40, 20, LIME); - Replaces something like that
+//DrawText(TextFormat( PRINT_INTEGER(player.is_standing) ), 10, 40, 20, LIME); - with that.
+
+
 //@ Pre-Underscore all global variables?
 //Pre-underscore-d variables are internal config flags(states) - modify them cautiously
 bool _is_borderless = false;
@@ -21,7 +28,7 @@ bool _draw_debug_info = false;
 bool _is_paused = false;
 bool _is_menu = false;
 bool free_cam = false; // free camera for debug mode
-int total_errors = 0;
+int total_errors = 0; // @ Need to make error system later
 int window_width = 1280; // maybe '_' (internal) too
 int window_height = 720;
 //initial "source" screen resolution
@@ -29,24 +36,27 @@ const int initial_window_width = window_width;
 const int initial_window_height = window_height;
 Vector2 window_position;  //Position of game window on monitor in pixels
 // window resolution scale
-float scale_x = 1.0f;
+float scale_x = 1.0f; // @Group them into struct(maybe even Vector) - scale.x /.y
 float scale_y = 1.0f;
 double delta_time = 0; //in-game physics time delta in seconds (could be paused or reversed or slowed)
 
-float scaled_mouse_x = 0;
+float scaled_mouse_x = 0; // @Group them also
 float scaled_mouse_y = 0;
 
 int active_gamepad = 0;
 const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config - not hooking for some reason
 
 
-#define GAME_SPEED 1 // for slow-mo
-#define WALK_SPEED 800.0f
+// @ Those probably shoud be const instead of define
+// (actually not even const for some, just global variables that are hard to change(underscored also?))
+#define GAME_SPEED 0.5 // for slow-mo  @ Change to mutable?
+#define WALK_SPEED 600.0f
 #define GRAVITATION 2000.0f
-#define INITIAL_FALLING_TIME 0.00 // initial acceleration time of free fall - for faster falling
+#define JUMP_POWER 1000
+//@Those could be const
 #define JUMP_INPUT_BUFFER_TIME 0.07
 #define COYOTE_TIME 0.07
-#define JUMP_POWER 1000
+#define INITIAL_FALLING_TIME 0.00 // initial acceleration time of free fall - for faster falling
 #define MIN_JUMP_INPUT_HOLD_TIME 0.15
 #define MAX_JUMP_INPUT_HOLD_TIME 0.7
 #define MAX_FALL_SPEED 1600.0
@@ -85,20 +95,37 @@ struct Player{
     float acceleration_right = 0;
     float acceleration_up = 0; // maybe just horizontal acceleration
     float acceleration_down = GRAVITATION;
+
+    double falling_time = 0; //@Rename? to time_of_fall
+    double air_time = 0;
+    double jump_input_buffer_time = 0; // Player jumps right after landing - even if pressed jump right before landing
+    double jump_input_hold_time = 0;
+
     bool facing_left = 0; //  horizontal image flip (direction)
 
     bool is_standing = false; //standing on the ground
     bool is_holding_jump = false;
     bool is_jumping = false;
     bool is_levitating = false; //when player is not falling (noclip, etc) (no use now)
+    bool is_walking = false;
 
-    bool is_running = false;
+    bool started_jumping = false;
+    bool started_falling = false;
+    bool has_landed = false; // touched the ground after falling(floating)
 
-    double falling_time = 0; //@Rename? to time_of_fall
-    double air_time = 0;
-    double jump_input_buffer_time = 0;
-    double jump_input_hold_time = 0;
 };
+
+struct Animation{
+    //unsigned int id; // animation enum
+    Texture2D texture; // Animation spritesheet
+    float speed = 0.1; //duration of each frame in seconds
+    bool is_looping = false;
+    bool is_playing = false; // flag - to reset animation when it's done playing
+
+    unsigned int current_frame = 0;
+    float timer = 0;// сколько времени показывается текущий кадр
+};
+
 
 struct Game_Level{
     static const int width = 60; // Level dimensions in 64x64 grid @Unfinished - Needs to be loaded by load level dimensions func
@@ -107,7 +134,7 @@ struct Game_Level{
 };
 
 struct Menu_Button{
-    int id; // menu_button enum
+    unsigned int id; // menu_button enum
     const char *label; //for some reason DrawText requires a const char* instead of string, but it's fine
     float x;
     float y;
@@ -149,11 +176,13 @@ void static_object_collision_by_speed(Player &player, Game_Level level);
 void static_object_collision_by_coordinates(Player &player, Game_Level level);
 
 // Draw functions
-void draw_screen_center();
 void draw_gamepads();
 void gamepad_disconnect_warning();
 void draw_debug_info();
 void static_objects_draw(Game_Level level, Texture2D texture, char object_symbol);
-void draw_target_texture(RenderTexture2D& target);
+void draw_render_texture(RenderTexture2D &target);
+
+// Debugging
+void measure_time(double start_time);
 
 

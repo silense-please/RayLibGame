@@ -33,11 +33,14 @@ void static_object_collision_by_speed(Player &player, Game_Level level) {
                                        (Rectangle){(float)x*TILESIZE, (float)y*TILESIZE, TILESIZE, TILESIZE})){
                     if(!CheckCollisionRecs((Rectangle){player.x, player.y, player.width, player.height}, // If player is NOT stuck in collision
                                            (Rectangle){(float)x*TILESIZE, (float)y*TILESIZE, TILESIZE, TILESIZE})){
-                        if(player.speed_y *delta_time > y*TILESIZE - (player.y + player.height)) { //Apply collision - if player wants to move into collision, move him right next to it
-                            player.speed_y = (y * TILESIZE - (player.y + player.height)) /delta_time;
-                            //Check if player is standing on the ground
-                            player.is_standing = true;
+                        if(player.speed_y * delta_time > y*TILESIZE - (player.y + player.height)) { //Apply collision - if player wants to move into collision, move him right next to it
+                            player.speed_y = (y * TILESIZE - (player.y + player.height)) / delta_time;
                         }
+                    }
+                    //Check if player is standing on the ground
+                    const float EPSILON = 0.01f;
+                    if (abs(player.y + player.height - y*TILESIZE) <= EPSILON && !player.started_jumping){
+                        player.is_standing = true;
                     }
                 }
                 //Up collision

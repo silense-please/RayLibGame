@@ -28,7 +28,7 @@ void toggle_borderless(){
     }
     else{ //Set Borderless
         window_position = GetWindowPosition();
-        Vector2 monitor_position = GetMonitorPosition(GetCurrentMonitor()); //Current monitor is the one where the center of window is
+        Vector2 monitor_position = GetMonitorPosition(GetCurrentMonitor());
         saved_width = GetScreenWidth();
         saved_height = GetScreenHeight();
         //^^^ Remember window state before turning on borderless ^^^

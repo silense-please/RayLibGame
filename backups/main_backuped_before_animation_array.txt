@@ -5,15 +5,8 @@
 #include "input.cpp"
 #include "collision.cpp"
 #include "draw.cpp"
-#include "debugging.cpp"
-
-#include <unordered_map>
-#include <map>
-//using std::unordered_map;
 
 int main(void){
-
-
 
     /// Initialization
     SetConfigFlags(FLAG_WINDOW_RESIZABLE); // |FLAG_VSYNC_HINT);
@@ -30,31 +23,31 @@ int main(void){
     SetWindowState(FLAG_VSYNC_HINT);
     SetTargetFPS(TARGET_FPS);
 
-
+    // @ Add this to the player struct?  - Anyway, GROUP THIS AND UNLOAD!!! (with loops)
+    // player_animation[0] = jump_start.texture  ... e.t.c
+    // animations array[id]= animation_struct.(tex/speed/looping_flag/...)
     Texture2D player_texture = LoadTexture("Game_Data/animations/player_64p.png"); // Placeholder player tex.
 
 
-    enum Animations // I don't want to pollute global scope, but if you need it outside of main - move it to declaration.
-    {
-        PLAYER_RUN,
-        PLAYER_IDLE,
-        PLAYER_JUMP,
-        PLAYER_FALL,
-        PLAYER_FALL_START,
-        PLAYER_JUMP_START,
-        PLAYER_LANDED,
 
-    };
+    //Texture2D player_run_anim  = LoadTexture("Game_Data/animations/player_run.png");
+    Animation run = {LoadTexture("Game_Data/animations/player_run.png"), 0.07, true};
+    //Texture2D player_idle_anim = LoadTexture("Game_Data/animations/player_idle.png");
+    Animation idle = {LoadTexture("Game_Data/animations/player_idle.png"), 0.4, true};
 
-    std::unordered_map<unsigned int, Animation> anims_player  {
-        {PLAYER_RUN,        {LoadTexture("Game_Data/animations/player_run.png"), 0.07, true}},
-        {PLAYER_IDLE,       {LoadTexture("Game_Data/animations/player_idle.png"), 0.4, true}},
-        {PLAYER_JUMP,       {LoadTexture("Game_Data/animations/player_jump.png"), 0.1, true}},
-        {PLAYER_FALL,       {LoadTexture("Game_Data/animations/player_fall.png"),0.1, true}},
-        {PLAYER_FALL_START, {LoadTexture("Game_Data/animations/player_fall_start.png"),0.04, false}},
-        {PLAYER_JUMP_START, {LoadTexture("Game_Data/animations/player_jump_start.png"), 0.08, false}},
-        {PLAYER_LANDED,     {LoadTexture("Game_Data/animations/player_fall_end.png"),0.04, false}},
-    };
+    //Texture2D player_jump_anim = LoadTexture("Game_Data/animations/player_jump.png");
+    Animation jump = {LoadTexture("Game_Data/animations/player_jump.png"), 0.1, true};
+
+    //Texture2D player_fall_anim = LoadTexture("Game_Data/animations/player_fall.png");
+    Animation fall = {LoadTexture("Game_Data/animations/player_fall.png"), 0.1, true};
+
+
+    Animation anim_fall_start = {LoadTexture("Game_Data/animations/player_fall_start.png"),0.04, false};
+    Animation anim_jump_start = {LoadTexture("Game_Data/animations/player_jump_start.png"), 0.08, false};
+    Animation anim_landed = {LoadTexture("Game_Data/animations/player_fall_end.png"),0.04, false};
+
+
+
 
     Texture2D background_texture = LoadTexture("Game_Data/background.png");
     Texture2D ground_texture = LoadTexture("Game_Data/ground.png");
@@ -82,12 +75,7 @@ int main(void){
 
     bool close_window = 0;
 
-    double time_of_animation_process = GetTime();
     while (!WindowShouldClose() && !close_window){ /// Main game loop
-        measure_time(time_of_animation_process); //Leave these two lines here if you want to measure whole frame time
-        time_of_animation_process = GetTime(); // This is debugging - for measure_time func.
-
-
         //UpdateMusicStream(music); // PLAY MUSIC
 
         if(_is_paused) delta_time = 0;
@@ -159,23 +147,29 @@ int main(void){
 
         /// Game Logic
         // stuff like sound, event triggers, animations logic will be here (everything that isn't Input or Draw)
-        camera.zoom = 1.4; //@ animation testing @Actually zoom 1 is too far, make it ~1.4 (change init window properly)
+        camera.zoom = 2; // animation testing
 
-
-        {/// Player started falling - one frame flag
+        { /// Player started falling - one frame flag
             static float previous_speed_y = -1;
-            if (player.started_falling) { player.started_falling = false; }
-            if (previous_speed_y <= 0 && player.speed_y > 0) {
-                player.started_falling = true; }
+            if (player.started_falling) {player.started_falling = false;}
+            if (previous_speed_y <= 0 && player.speed_y > 0){player.started_falling = true;}
             previous_speed_y = player.speed_y;
+
+            if (player.started_falling) {anim_fall_start.is_playing = true;}
+            if (player.is_standing) anim_fall_start.is_playing = false;
         }
 
-        { /// Player landed
+
+        { /// PLayer landed
             static bool previous_standing = false;
             if (player.has_landed) player.has_landed = false;
             if (!previous_standing && player.is_standing) player.has_landed = true;
             previous_standing = player.is_standing;
+
+            if (player.has_landed) anim_landed.is_playing = true;
+            if (!player.is_standing) anim_landed.is_playing = false;
         }
+
 
         { /// PLayer started jumping - flag goes for 1.5 loops, so be cautious
             static bool previous_jumped = false;
@@ -183,53 +177,55 @@ int main(void){
                 player.started_jumping = false;
                 previous_jumped = false;
             }
-            if (player.started_jumping) { previous_jumped = true; }
+            if (player.started_jumping) { previous_jumped = true;}
+
+            if (player.started_jumping) anim_jump_start.is_playing = true;
+            if (player.falling_time > 0 || player.is_standing) {anim_jump_start.is_playing = false;}
         }
 
-
-
-        { ///Animation management
-            /// STARTED FALLING
-            if (player.started_falling) { anims_player[PLAYER_FALL_START].is_playing = true; }
-            if (player.is_standing) anims_player[PLAYER_FALL_START].is_playing = false;
-            /// LANDED
-            if (player.has_landed) anims_player[PLAYER_LANDED].is_playing = true;
-            if (!player.is_standing) anims_player[PLAYER_LANDED].is_playing = false;
-            /// STARTED JUMPING
-            if (player.started_jumping) anims_player[PLAYER_JUMP_START].is_playing = true;
-            if (player.falling_time > 0 || player.is_standing) { anims_player[PLAYER_JUMP_START].is_playing = false; }
-            ///  IDLE
+        { /// Player is idle
             if(player.speed_x == 0 && player.speed_y == 0){
-                anims_player[PLAYER_IDLE].is_playing = true;
+                idle.is_playing = true;
             } else{
-                anims_player[PLAYER_IDLE].is_playing = false;
+                idle.is_playing = false;
             }
-            ///  RUNNING
+        }
+        { /// Player is running
             if(abs(player.speed_x) > 0 && player.speed_y == 0){
-                anims_player[PLAYER_RUN].is_playing = true;
+                run.is_playing = true;
             } else{
-                anims_player[PLAYER_RUN].is_playing = false;
+                run.is_playing = false;
             }
-            /// JUMPING
-            if(player.speed_y < 0 && !anims_player[PLAYER_JUMP_START].is_playing){
-                anims_player[PLAYER_JUMP].is_playing = true;
-            } else anims_player[PLAYER_JUMP].is_playing = false;
-            /// FALLING
-            if(player.speed_y >= 0 && !anims_player[PLAYER_FALL_START].is_playing){
-                anims_player[PLAYER_FALL].is_playing = true;
-            } else anims_player[PLAYER_FALL].is_playing = false;
         }
 
 
-        for (auto anim = anims_player.begin(); anim != anims_player.end(); ++anim) {
-            reset_animation(anim->second);
-        }
 
-        // Possibly dangerous variant (because without const)
-//        for ( auto& anim : anims_player) {
-//            reset_animation(anim.second);
-//        }
 
+        //@THIS WILL BE FUNC WITH LOOP PASSING THROUGH ARRAY OF ANIMATION STRUCTS. FUNC WILL POLL FLAG AND FLUSH TIMERS
+        // for (anim.array - sizeof(array) / sizeof(Anim)) ... switch case anim1, anim2 ...
+                if (!anim_jump_start.is_playing){
+                    anim_jump_start.current_frame = 0;
+                    anim_jump_start.timer = 0;
+                }
+
+                if (!anim_fall_start.is_playing){
+                    anim_fall_start.current_frame = 0;
+                    anim_fall_start.timer = 0;
+                }
+                if (!anim_landed.is_playing){
+                    anim_landed.current_frame = 0;
+                    anim_landed.timer = 0;
+                }
+
+                if (!idle.is_playing){
+                    idle.current_frame = 0;
+                    idle.timer = 0;
+                }
+
+                if (!run.is_playing) {
+                    run.current_frame = 0;
+                    run.timer = 0;
+                }
 
 
             /// Draw everything to target texture to enable window scaling/stretching
@@ -242,25 +238,25 @@ int main(void){
                 if(_draw_debug_info)DrawRectangleRec((Rectangle){player.x, player.y, player.width, player.height}, RED);
 
                 { // Draw player func
-                    if (anims_player[PLAYER_LANDED].is_playing){
-                        draw_player_animation(player, anims_player[PLAYER_LANDED]);
+                    if (anim_landed.is_playing){
+                        draw_player_animation(player, anim_landed);
                     }
-                    else if(anims_player[PLAYER_IDLE].is_playing) { // "is_idle"
-                        draw_player_animation(player, anims_player[PLAYER_IDLE]);
-                    }else if(anims_player[PLAYER_RUN].is_playing){// "is_running"
-                        draw_player_animation(player, anims_player[PLAYER_RUN]);
+                    else if(idle.is_playing) { // "is_idle"
+                        draw_player_animation(player, idle);
+                    }else if(run.is_playing){// "is_running"
+                        draw_player_animation(player, run);
                     }else if(player.speed_y < 0) //is jumping
                     {
-                        if (anims_player[PLAYER_JUMP_START].is_playing){
-                            draw_player_animation(player, anims_player[PLAYER_JUMP_START]);
+                        if (anim_jump_start.is_playing){
+                            draw_player_animation(player, anim_jump_start);
                         }
-                        else{ draw_player_animation(player,anims_player[PLAYER_JUMP]);}
+                        else{ draw_player_animation(player,jump);}
                     }else //is falling
                     {
-                        if (anims_player[PLAYER_FALL_START].is_playing)
-                            draw_player_animation(player, anims_player[PLAYER_FALL_START]);
+                        if (anim_fall_start.is_playing)
+                            draw_player_animation(player, anim_fall_start);
                         else
-                            draw_player_animation(player,anims_player[PLAYER_FALL]);
+                            draw_player_animation(player,fall);
 
                     }
                 }
@@ -283,9 +279,8 @@ int main(void){
             if (_is_paused) DrawText("PAUSED", 500, 50, 60, LIME);
 
             if (_draw_debug_info) draw_debug_info(); //@Maybe just put func contents here
-            show_collision(player,current_level); //@Temporary - maybe move to draw_debug_info after collision system is finished
 
-            //@Temporary - move to draw debug info later
+            //@Temporary - move to draw debug info
             DrawRectangle(0,0,250,400,Color{0,0,0,180}); // Debug info opacity
             //DrawText(TextFormat("standing: %d", player.is_standing), 10, 40, 20, LIME);
             //DrawText(TextFormat("jumping: %d", player.is_jumping), 10, 40, 20, LIME);
@@ -302,21 +297,20 @@ int main(void){
             DrawText(TextFormat("Speed Y: %f", player.speed_y), 10, 280, 20, LIME);
 
             if (free_cam) DrawText("FREE CAMREA", 700, 100, 40, DARKGREEN);
+            show_collision(player,current_level); //@Temporary - maybe move to draw_debug_info after collision system is finished
 
             DrawText(TextFormat( "%fms", GetFrameTime() *1000), 120, 10, 20, LIME);
             DrawFPS(10,10);
         } EndTextureMode();
         draw_render_texture(render_texture);
+
     } ///---Main loop
 
 
     //UnloadMusicStream(music);
     //CloseAudioDevice();
-
-    for (auto anim = anims_player.begin(); anim != anims_player.end(); ++anim) {
-        UnloadTexture(anim->second.texture);
-    }
     UnloadTexture(player_texture);
+    // @UNLOAD EVERYTHING!!!
     UnloadTexture(ground_texture);
     UnloadTexture(background_texture);
     UnloadRenderTexture(render_texture);

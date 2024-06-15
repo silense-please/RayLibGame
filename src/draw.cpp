@@ -1,10 +1,4 @@
 
-// Crosshair in the center of screen demonstrating current window moonitor
-void draw_screen_center(){
-    DrawRectangle(initial_window_width / 2 - 2, initial_window_height / 2 - 35, 5, 70, RED);
-    DrawRectangle(initial_window_width / 2 - 35, initial_window_height / 2 - 2, 70, 5, RED);
-}
-
 // Draw current connected gamepads (for debugging)
 void draw_gamepads(){
     for (int current_gamepad = 0; current_gamepad < max_gamepads; ++current_gamepad) {
@@ -33,19 +27,18 @@ void gamepad_disconnect_warning(){
 
 // Draw all debugging text
 void draw_debug_info(){
-    if(IsWindowFullscreen()){
-        DrawText("WINDOW IS FULLSCREEN", 200, 40, 40, RED);
+    //@ Add more stages here for displaying different info like: input, jump times, gamepads and screen stuff, ... /
+    //  to just switch what you need with hotkeys (if Alt+S draw screen stuff... and so on)
+    { /// Draw screen info
+        if (IsWindowFullscreen()) {
+            DrawText("WINDOW IS FULLSCREEN", 200, 40, 40, RED);
+        } else if (_is_borderless) {
+            DrawText("WINDOW IS BORDERLESS", 200, 40, 40, RED);
+        } else if (IsWindowMaximized()) {
+            DrawText("WINDOW IS 'MAXIMIZED'", 200, 40, 40, RED);
+        }
+        DrawText(TextFormat("CURRENT MONITOR: %i", GetCurrentMonitor()), 200, 0, 40, RED);
     }
-    else if(_is_borderless){
-        DrawText("WINDOW IS BORDERLESS", 200, 40, 40, RED);
-    }
-    else if(IsWindowMaximized()){
-        DrawText("WINDOW IS 'MAXIMIZED'", 200, 40, 40, RED);
-    }
-
-    DrawText(TextFormat( "CURRENT MONITOR: %i", GetCurrentMonitor()), 200, 0, 40, RED);
-    DrawText(TextFormat( "FRAMETIME: %f", GetFrameTime() *1000), 10, 40, 20, LIME);
-    draw_screen_center(); //@make this toggle
     draw_gamepads();
     gamepad_disconnect_warning();
 }
@@ -62,27 +55,48 @@ void static_objects_draw(Game_Level level, Texture2D texture, char object_symbol
 
 
 // Draw resized target render texture on the screen (Final draw)
-void draw_target_texture(RenderTexture2D& target){
+void draw_render_texture(RenderTexture2D& target){
     BeginDrawing();
     ClearBackground(LIGHTGRAY);
     // Draw render texture to screen, properly scaled
     DrawTexturePro(target.texture, (Rectangle){ 0.0f, 0.0f, (float)target.texture.width, (float)-target.texture.height},
                    (Rectangle){(GetScreenWidth() - ((float)initial_window_width*scale_x))*0.5f, (GetScreenHeight() - ((float)initial_window_height*scale_y))*0.5f,
                                (float)initial_window_width*scale_x, (float)initial_window_height*scale_y }, (Vector2){ 0, 0 }, 0.0f, WHITE);
-    EndDrawing();
+    EndDrawing(); // "Target FPS" lock slows fps here
 
 }
 
 // Draw animation from one row spritesheet
-//frame_duration is animation speed
-void draw_player_animation(Player player, Texture animation, float frame_duration){
-    int frames = animation.width / TILESIZE;
+void draw_player_animation(Player player, Animation &animation){
+    int frames = animation.texture.width / TILESIZE;
     bool flip = player.facing_left; //minus(-) in source's width mirrors image
-    static int frame = 0;
-    static float timer = 0;
-    timer += delta_time;
-    if (frame > frames-1) frame = 0;
-    Rectangle run_frame_rec = {(float)frame*(float)animation.width / frames,0, (float)animation.width / frames *(flip? -1: 1), (float)animation.height};
-    DrawTextureRec(animation,run_frame_rec , (Vector2) {(float) player.x - player.width/2, (float) player.y}, WHITE);
-    if (timer >= frame_duration){frame ++; timer = 0;}
+
+    Rectangle run_frame_rec = {(float)animation.current_frame*(float)animation.texture.width / frames,0, (float)animation.texture.width / frames *(flip? -1: 1), (float)animation.texture.height};
+    DrawTextureRec(animation.texture,run_frame_rec , (Vector2) {(float) player.x - player.width/2, (float) player.y}, WHITE);
+    animation.timer += delta_time;
+
+    if(_draw_debug_info){ // Visualising to see if animations working properly
+        DrawText(TextFormat("%d", animation.current_frame ), player.x, player.y - 20, 5, animation.current_frame%2 == 0?LIME:BLUE);
+        DrawText(TextFormat("timer: %f", animation.timer), player.x, player.y - 40, 20, animation.current_frame%2 == 0?LIME:BLUE);
+    }
+
+    if (animation.timer >= animation.speed){animation.current_frame ++; animation.timer = 0;} // Proceed to the next frame
+
+    if (animation.current_frame > frames-1) {
+        if (animation.is_looping){ // Loop animation.
+            animation.current_frame = 0;
+        } else{ // Animation is finished.
+            animation.is_playing = false;
+            animation.current_frame = 0;
+            animation.timer = 0;
+        }
+    }
+}
+
+// Reset animation if it's finished.
+void reset_animation(Animation &animation){
+    if (!animation.is_playing){
+        animation.current_frame = 0;
+        animation.timer = 0;
+    }
 }

@@ -15,40 +15,45 @@ camera - side-scrolling
 pause system (and UI)
  gravity and jumps
 make good jumps https://www.youtube.com/watch?v=Mo1-sKYbks0 https://www.youtube.com/watch?v=7KiK0Aqtmzc&t=216s
-basic animation system
-
+animation system and grouping
 
 --IN PROGRESS
-sound (witness) system (sorry)
+
+sound (witness) system (sorry)   - Try to reverse (play with) audio in standalone miniaudio test app
+
 
 --TODO - make test game (engine demo) - КОРОЧЕ ДЕЛАЙ УЖЕ МЕХАНИКИ ИГРЫ, А ВСЯКИЕ ВТОРОСТЕПЕННЫЕ МЕНЮ ПОТОМ
 event triggers in level , text in level (somewhere between the sacred ...)
 make RPG-7
 debug mode on/off switch
 
+--FINISH DEMO
 Make button input config (txt) file and load bindings from it
 Cleanup after "engine v1" done - sweep comments, restructure, fill declaration.cpp, make "debug" and release game mode e.t.c
 compile release build and test it on VM and then on dimkanet's PC
+try to build for android lol (bad idea, it'll be exhausting)
 
 --REVERSE
     objects
     player
     audio
 
---AUDIO PROBLEM - HOW TO REVERSE IT ? - ffmpeg?, SDL?, miniaudio low level API? (scary), BASS audio lib, RubberBand
+--AUDIO PROBLEM - HOW TO REVERSE IT ? - ffmpeg?, SDL?, miniaudio low level API? (scary),OpenAL?, BASS audio lib
+clues - Braid is using OGG, so we can reverse ogg's audio stream i guess
 better not to reverse audio, but play it with changed pitch(a.k.a tempo) to -1, so we can also slow down or speed up sound
     almost everywhere (incl raylib) pitch minimum is >0 so they cant play sounds in reverse
 
-
-add hot reloading system via dlls for debugging (TSoding)
+add proper flags (to player struct?) to player for switching animations and stuff - started_jump/walking/idle/falling
+add draw smoothing to fast projectiles (e.g.rockets) - https://youtu.be/pnhJ5SDZpGU?si=scXMy6RU2_zMpQfC - TSoding
+add hot reloading system via dlls for debugging (TSoding, Karl Zylinski)
 rebuild(refactor) player accelerations to the real vectors
 mb collisions can be improved (collide by speed vectors) (the corners, step on platform if almost jumped high enough)
 Texture loading and unloading system (or just a separate file of loads) and characters' ids system to link them with texture
 different game "scenes" - levels basically
 
-pull out Raylib's update and draw (delta)time alike GetFrameTime() to measure performance costs (from rcore.c)
+pull out Raylib's update and draw (delta)time alike GetFrameTime() to measure performance costs (from rcore.c line 880)
 draw text stats&metrics for debug
-error handling and output - "falied to load ..." (investigate what is try/catch)
+error handling and output - "falied to load ..." (investigate what is try/catch (throw)) - or assert???
 write tests (unittests i guess (do I need them?))
 saves - game state (serialization?)
 timestamps - UPS - game logic(physics etc) has to update at fixed rate (60 per sec) - not necessary
@@ -60,6 +65,7 @@ refactor "1 time used functions" into { "blocks of code" and also separate stand
 maybe consider more jump help like edge detection -  https://youtu.be/3sWTzMsmdx8?si=aEuX8x2OJ8Y_qTnX&t=109
                                                     https://youtu.be/Bsy8pknHc0M?si=3_uyQANwHjnAYpNt&t=157
 find out how to reverse sounds (without duplicating every sound in reverse and swapping them - it will be a nightmare)
+pack structs efficiently??? (alignment, packing, padding) - to reduce reverse data in memory
 
 try level editors - LDtk, Tiled
 try OpenGL integration
@@ -71,6 +77,13 @@ try to "static link mingw32 libraries" i guess - put all dll libs into exe file 
     https://youtu.be/fVJHmGPfsEk?si=919unMBLcmKsRhUf&t=470
 try raylib SDL backend (for better fullscreening )- setup - https://youtu.be/CfeHFIP_xEI?si=SpnQzOm76Wk5GqeW&t=994
 
+
+--Performance:
+As of 15.06.24 game runs at ~400us (microseconds) each frame, or 500us if dragging mouse, 450us if borderless,
+    650us if Nvidia Shadowplay - measured by custom measure_time() prototype profiling func
+    Dont want to drop below 1ms(1000fps) on my pc, so look out for bottlenecks.
+15.06.24 - ~0.5ms
+...
 
 --Problems:
    -Screen tearing occurs when Vsync is off - I cant find VRR option in OpenGL - to render any fps(1000) without tearing
@@ -98,6 +111,14 @@ try raylib SDL backend (for better fullscreening )- setup - https://youtu.be/Cfe
    -Cursor is disappearing in borderless with discord or OBS - Well... what can I do?
    -FPS Monitor (sometimes?) crashes SFML window upon closing FPS Monitor
    -Pushing out of stuck in static_object_collision() don't work properly
+   -Crash of miniaudio? Game just froze and crashed after a while(running ~2min max)
+       maybe just Windows is memeing -lot of apps were opened , OR maybe I need to get rid of miniaudio
+           Assertion failed!
+           Program: D:\!!!Projects\CPP\RayLibGame\cmake-build-debug\RayLibGame.exe
+           File: D:/!!!Projects/CPP/RayLibGame/raylib/src/external/miniaudio.h, Line 51578
+           Expression: pResampler->inTimeInt == 0
+           Process finished with exit code 3
+
 
 
 Don't be afraid to delete parts of code!
