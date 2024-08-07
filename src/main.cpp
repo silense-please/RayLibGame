@@ -7,33 +7,27 @@
 #include "draw.cpp"
 #include "debugging.cpp"
 
-#include <unordered_map>
-#include <map>
-//using std::unordered_map;
 
 int main(void){
 
 
-
     /// Initialization
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE); // |FLAG_VSYNC_HINT);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_WINDOW_ALWAYS_RUN ); // |FLAG_VSYNC_HINT);
     InitWindow(window_width, window_height, "RAYLIB-DEMO");
     //SetMouseCursor(0);
 
     // Render texture initialization - to hold the rendering result and be able to resize it
     RenderTexture2D render_texture = LoadRenderTexture(window_width, window_height);
+
     //toggle_borderless(); // Set borderless at startup
 
-    Image game_icon = LoadImage("Game_Data/animations/player_64p.png");
+    Image game_icon = LoadImage("Game_Data/game_icon.png");
     SetWindowIcon(game_icon);
     SetExitKey(KEY_END);
     SetWindowState(FLAG_VSYNC_HINT);
     SetTargetFPS(TARGET_FPS);
 
-
     Texture2D player_texture = LoadTexture("Game_Data/animations/player_64p.png"); // Placeholder player tex.
-
-
     enum Animations // I don't want to pollute global scope, but if you need it outside of main - move it to declaration.
     {
         PLAYER_RUN,
@@ -46,15 +40,29 @@ int main(void){
 
     };
 
+    // I tried grouping animations without map, just with array, but it was a clusterfuck.
+    // @ I don't like using unfamiliar expressins - so find out how hash table work (or whatever unordered map is) 
+    //and get rid of STL map, do we even need to optimise this with hash table? Maybe just Array of Structs? (as JBlow advised)
+
+    // Use .at() instead of [] ??   ( [] operator generates new map member if it didn't find one)
+    //https://www.youtube.com/watch?v=KiB0vRi2wlc
     std::unordered_map<unsigned int, Animation> anims_player  {
-        {PLAYER_RUN,        {LoadTexture("Game_Data/animations/player_run.png"), 0.07, true}},
-        {PLAYER_IDLE,       {LoadTexture("Game_Data/animations/player_idle.png"), 0.4, true}},
-        {PLAYER_JUMP,       {LoadTexture("Game_Data/animations/player_jump.png"), 0.1, true}},
-        {PLAYER_FALL,       {LoadTexture("Game_Data/animations/player_fall.png"),0.1, true}},
-        {PLAYER_FALL_START, {LoadTexture("Game_Data/animations/player_fall_start.png"),0.04, false}},
-        {PLAYER_JUMP_START, {LoadTexture("Game_Data/animations/player_jump_start.png"), 0.08, false}},
-        {PLAYER_LANDED,     {LoadTexture("Game_Data/animations/player_fall_end.png"),0.04, false}},
+            {PLAYER_RUN,        {LoadTexture("Game_Data/animations/player_run.png"), 0.07, true}},
+            {PLAYER_IDLE,       {LoadTexture("Game_Data/animations/player_idle.png"), 0.4, true}},
+            {PLAYER_JUMP,       {LoadTexture("Game_Data/animations/player_jump.png"), 0.1, true}},
+            {PLAYER_FALL,       {LoadTexture("Game_Data/animations/player_fall.png"),0.1, true}},
+            {PLAYER_FALL_START, {LoadTexture("Game_Data/animations/player_fall_start.png"),0.06, false}},
+            {PLAYER_JUMP_START, {LoadTexture("Game_Data/animations/player_jump_start.png"), 0.1, false}},
+            {PLAYER_LANDED,     {LoadTexture("Game_Data/animations/player_fall_end.png"),0.05, false}},
     };
+
+    //@TESTING
+    //GenTextureMipmaps(&anims_player[PLAYER_IDLE].texture);
+    //SetTextureFilter(anims_player[PLAYER_IDLE].texture, TEXTURE_FILTER_ANISOTROPIC_16X);
+    //SetTextureFilter(render_texture.texture, TEXTURE_FILTER_BILINEAR);
+    //SetTextureWrap(anims_player[PLAYER_IDLE].texture, TEXTURE_WRAP_CLAMP);
+
+
 
     Texture2D background_texture = LoadTexture("Game_Data/background.png");
     Texture2D ground_texture = LoadTexture("Game_Data/ground.png");
@@ -66,14 +74,14 @@ int main(void){
     load_player_spawn(current_level, player);
 
     Camera2D camera = {(Vector2){(float)window_width /2, (float)window_height /2},
-                       (Vector2){ (float)window_width /2, (float)window_height /2 },0,1};
+                       (Vector2){ (float)window_width /2, (float)window_height /2 },0,1.5};
 
     const int MENU_BUTTONS = 2;
     Menu_Button menu_btns[MENU_BUTTONS]
-    {
-        {BTN_RESUME,"RESUME",(float)window_width/2 -125, 200, },
-        {BTN_QUIT,  "QUIT",  (float)window_width/2 -125, 400, }
-    };
+            {
+                    {BTN_RESUME,"RESUME",(float)window_width/2 -125, 200, },
+                    {BTN_QUIT,  "QUIT",  (float)window_width/2 -125, 400, }
+            };
 
     InitAudioDevice();
     Music music = LoadMusicStream("Game_Data/test_music.mp3");
@@ -82,10 +90,12 @@ int main(void){
 
     bool close_window = 0;
 
-    double time_of_animation_process = GetTime();
+    double measure_time_start = GetTime();
+    double average_measured_time = 0; //@ Move to global?? (to be able to measure inside funcs)
+
     while (!WindowShouldClose() && !close_window){ /// Main game loop
-        measure_time(time_of_animation_process); //Leave these two lines here if you want to measure whole frame time
-        time_of_animation_process = GetTime(); // This is debugging - for measure_time func.
+        average_measured_time = measure_time(measure_time_start); //Leave these two lines here if you want to measure whole frame time
+        measure_time_start = GetTime(); // This is debugging - for measure_time func.
 
 
         //UpdateMusicStream(music); // PLAY MUSIC
@@ -112,13 +122,7 @@ int main(void){
         }
 
 
-        static float pitch = 1;
-        if (IsButtonDown(BUTTON_MOVE_LEFT) && pitch > 0.01){ pitch -= 0.01; }
-        else if((IsButtonDown(BUTTON_MOVE_RIGHT) && pitch < 10)){pitch += 0.01; }
-        SetMusicPitch(music, pitch);
-
-
-        process_input(player, camera, current_level);
+        process_input(player, camera, current_level); //@ Unfold in here???
 
         { ///APPLY INPUTS TO PLAYER - walking, jumping, collision
 
@@ -153,13 +157,13 @@ int main(void){
         }
 
 
-        camera.zoom += ((float)GetMouseWheelMove() * (0.1f*camera.zoom));
+        camera.zoom += ((float)GetMouseWheelMove() * 0.1f); //(0.1f*camera.zoom));
         if(!free_cam) // Camera just follows player for now
             camera.target = (Vector2){ player.x + player.width/2, player.y + player.height/2};
 
         /// Game Logic
         // stuff like sound, event triggers, animations logic will be here (everything that isn't Input or Draw)
-        camera.zoom = 1.4; //@ animation testing @Actually zoom 1 is too far, make it ~1.4 (change init window properly)
+        //camera.zoom = 1.3; // @animation testing @Actually zoom 1 is too far, make it ~1.4 (change init window properly)
 
 
         {/// Player started falling - one frame flag
@@ -185,7 +189,6 @@ int main(void){
             }
             if (player.started_jumping) { previous_jumped = true; }
         }
-
 
 
         { ///Animation management
@@ -221,22 +224,25 @@ int main(void){
         }
 
 
-        for (auto anim = anims_player.begin(); anim != anims_player.end(); ++anim) {
-            reset_animation(anim->second);
+//        for (auto anim = anims_player.begin(); anim != anims_player.end(); ++anim) { // very old version @Deletable!!!
+//            reset_animation(anim->second);
+//        }
+
+        for ( auto& anim : anims_player) { // anim.first is a 'const' key, anim.second is a value.
+            reset_animation(anim.second);
         }
 
-        // Possibly dangerous variant (because without const)
-//        for ( auto& anim : anims_player) {
-//            reset_animation(anim.second);
+//        for ( auto& [name, anim] : anims_player) { // C++17 fancy version - test speed
+//            reset_animation(anim);
 //        }
 
 
-
-            /// Draw everything to target texture to enable window scaling/stretching
-        BeginTextureMode(render_texture);{
+        /// Draw everything to target texture to enable window scaling/stretching
+        BeginTextureMode(render_texture);
+        {
             ClearBackground(LIGHTGRAY);
-
-            BeginMode2D(camera);{
+            BeginMode2D(camera);
+            {
                 DrawTextureEx(background_texture, (Vector2) {(float) 0, (float) 0}, 0, 3, WHITE);
                 //draw player collision box
                 if(_draw_debug_info)DrawRectangleRec((Rectangle){player.x, player.y, player.width, player.height}, RED);
@@ -261,7 +267,6 @@ int main(void){
                             draw_player_animation(player, anims_player[PLAYER_FALL_START]);
                         else
                             draw_player_animation(player,anims_player[PLAYER_FALL]);
-
                     }
                 }
 
@@ -294,34 +299,62 @@ int main(void){
             DrawText(TextFormat(PRINT_INTEGER(player.is_standing)), 10, 80, 20, player.is_standing == 1?ORANGE:LIME);
 
 
+            /*
             DrawText(TextFormat("jump hold t: %f", player.jump_input_hold_time), 10, 120, 20, LIME);
             DrawText(TextFormat("jump hold b: %d", player.is_holding_jump), 10, 160, 20, LIME);
             DrawText(TextFormat("air time: %f", player.air_time), 10, 200, 20, LIME);
 
-            DrawText(TextFormat("falling_time: %f ", player.falling_time), 10, 240, 20, LIME);
             DrawText(TextFormat("Speed Y: %f", player.speed_y), 10, 280, 20, LIME);
+
+             */
+            DrawText(TextFormat(PRINT_FLOAT(camera.zoom)), 10, 200, 20, LIME);
+
+            DrawText(TextFormat("falling_time: %f ", player.falling_time), 10, 240, 20, LIME);
+            DrawText(TextFormat("%f us", average_measured_time), 10, 320, 20, LIME);
 
             if (free_cam) DrawText("FREE CAMREA", 700, 100, 40, DARKGREEN);
 
             DrawText(TextFormat( "%fms", GetFrameTime() *1000), 120, 10, 20, LIME);
             DrawFPS(10,10);
         } EndTextureMode();
-        draw_render_texture(render_texture);
+
+        { /// Draw resized target render texture on the screen, properly scaled (Final draw)
+            BeginDrawing();
+            ClearBackground(LIGHTGRAY);
+
+            Rectangle source = { 0.0f, 0.0f, (float)render_texture.texture.width, (float)-render_texture.texture.height};
+            Rectangle dest = {((float)GetScreenWidth() - ((float)initial_window_width*scale_x))*0.5f, ((float)GetScreenHeight() - ((float)initial_window_height*scale_y))*0.5f, (float)initial_window_width*scale_x, (float)initial_window_height*scale_y };
+            Vector2 origin = { 0.0f, 0.0f };
+
+            DrawTexturePro(render_texture.texture, source, dest, origin, 0.0f, WHITE);
+
+            EndDrawing(); // "Target FPS" lock slows fps here
+        }
+
     } ///---Main loop
 
 
-    //UnloadMusicStream(music);
-    //CloseAudioDevice();
+    /*
+    We actually don't need to unload anything after the main loop because at this point the game will be closed and the OS will wipe all of the program's memory. The only thing should be happening after main loop is saving and similar stuff.
+    DON'T DELETE THIS: leave commented out to remember that we need to unload textures if we're NOT closing program (e.g. changing levels) to avoid LEAKS. - silense_please, 06 aug 24.
 
-    for (auto anim = anims_player.begin(); anim != anims_player.end(); ++anim) {
-        UnloadTexture(anim->second.texture);
+    for ( auto& anim_pair : anims_player) { // anim.first is a 'const' key, anim.second is a value.
+        UnloadTexture(anim_pair.second.texture);
     }
+
     UnloadTexture(player_texture);
     UnloadTexture(ground_texture);
     UnloadTexture(background_texture);
     UnloadRenderTexture(render_texture);
-    CloseWindow();
 
-    printf("Errors: %i\n", total_errors);
+    //UnloadMusicStream(music);
+    */
+
+    //@ Investigate later: I'm not sure that we don't need these, what if raylib breaks? or "audio device" won't close?
+    //CloseAudioDevice();
+    //CloseWindow();
+
+    printf("Errors: %i\n", total_errors); // Make error system later
     return 0;
 }
+

@@ -1,9 +1,15 @@
-// "@" sign - tags & reminders to cleanup\change the code later
+// '@' sign - tags & reminders to cleanup\change the code later
 
+// @ We should get rid of C++ containers stuff(map and string and iostream) because(if) they are slow, they pollute
+// disassebmly, they are obscure. String might be fine, map is pretty bad, iostream - no idea.
+// Replase them with something like stb???
+
+//#include <cmath> //DO I NEED THIS ?
 #include "raylib.h"
 #include <fstream>
 #include <iostream>
-//#include <cmath> //DO I NEED THIS ?
+#include <unordered_map>
+//#include <map>
 using std::string;
 using std::abs;
 
@@ -30,7 +36,7 @@ bool _is_menu = false;
 bool free_cam = false; // free camera for debug mode
 int total_errors = 0; // @ Need to make error system later
 int window_width = 1280; // maybe '_' (internal) too
-int window_height = 720;
+int window_height = window_width / 1.77777f; // - 16/9
 //initial "source" screen resolution
 const int initial_window_width = window_width;
 const int initial_window_height = window_height;
@@ -49,7 +55,7 @@ const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config
 
 // @ Those probably shoud be const instead of define
 // (actually not even const for some, just global variables that are hard to change(underscored also?))
-#define GAME_SPEED 0.5 // for slow-mo  @ Change to mutable?
+#define GAME_SPEED 1.0 // for slow-mo  @ Change to mutable?
 #define WALK_SPEED 600.0f
 #define GRAVITATION 2000.0f
 #define JUMP_POWER 1000
@@ -183,6 +189,6 @@ void static_objects_draw(Game_Level level, Texture2D texture, char object_symbol
 void draw_render_texture(RenderTexture2D &target);
 
 // Debugging
-void measure_time(double start_time);
+double measure_time(double start_time);
 
 

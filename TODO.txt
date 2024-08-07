@@ -18,31 +18,41 @@ make good jumps https://www.youtube.com/watch?v=Mo1-sKYbks0 https://www.youtube.
 animation system and grouping
 
 --IN PROGRESS
+Ремувай рендер текстуру нахер, скейли зумом камеры (чтоб зум как в backups\PLAYER_SCALE.PNG), (потом) добавь 16/10 и леттербоксинг для остальных соотношений либо стетч картинки рендер текстурой уже пост фактум - чтоб рендер текстура инчего не скейлила
+(А как текст скейлить???) можно растягивать рендер текстурой и фигачить поверх всего в конце дроу, только не делать ClearBackground чтоб оно накладывалось поверх фрейма
 
-sound (witness) system (sorry)   - Try to reverse (play with) audio in standalone miniaudio test app
-
+make RPG-7
 
 --TODO - make test game (engine demo) - КОРОЧЕ ДЕЛАЙ УЖЕ МЕХАНИКИ ИГРЫ, А ВСЯКИЕ ВТОРОСТЕПЕННЫЕ МЕНЮ ПОТОМ
 event triggers in level , text in level (somewhere between the sacred ...)
-make RPG-7
-debug mode on/off switch
+sound (witness) system (sorry)
+(FULL) debug mode on/off switch
 
 --FINISH DEMO
 Make button input config (txt) file and load bindings from it
 Cleanup after "engine v1" done - sweep comments, restructure, fill declaration.cpp, make "debug" and release game mode e.t.c
 compile release build and test it on VM and then on dimkanet's PC
-try to build for android lol (bad idea, it'll be exhausting)
+LATER-try to build for android lol (bad idea, it'll be exhausting)
 
 --REVERSE
     objects
     player
     audio
 
---AUDIO PROBLEM - HOW TO REVERSE IT ? - ffmpeg?, SDL?, miniaudio low level API? (scary),OpenAL?, BASS audio lib
-clues - Braid is using OGG, so we can reverse ogg's audio stream i guess
+--AUDIO PROBLEM - HOW TO REVERSE IT ? - ffmpeg? - NO, SDL? - NO, miniaudio low level API? (scary),OpenAL?, BASS audio lib
+clues - Braid is using OGG, so we can reverse ogg's audio stream i guess. Or probably WAV is the easiest?
 better not to reverse audio, but play it with changed pitch(a.k.a tempo) to -1, so we can also slow down or speed up sound
     almost everywhere (incl raylib) pitch minimum is >0 so they cant play sounds in reverse
+https://github.com/benjamin-ab/Sound-Reverse/blob/master/reverse.c - NO, this just reverses whole track before outputting
 
+--ANIMATIONS & STUFF
+JUST LEAVE RESOLUTION HARDCODED TO 720p FOR NOW, ITS FINE. mb fix camera jittering later.
+сделать анимацию прыжка повыразительнее, чтобы он башкой тряс - как в холлоу найте ( и с одной ноги начинать прыгать)
+jump start amination -  ноги поджимать при начале прыжка
+
+--AFTER DEMO:
+Try to reverse (play with) audio in standalone miniaudio test app
+How to include windows.h without funcs duplicating error?
 add proper flags (to player struct?) to player for switching animations and stuff - started_jump/walking/idle/falling
 add draw smoothing to fast projectiles (e.g.rockets) - https://youtu.be/pnhJ5SDZpGU?si=scXMy6RU2_zMpQfC - TSoding
 add hot reloading system via dlls for debugging (TSoding, Karl Zylinski)
@@ -50,10 +60,11 @@ rebuild(refactor) player accelerations to the real vectors
 mb collisions can be improved (collide by speed vectors) (the corners, step on platform if almost jumped high enough)
 Texture loading and unloading system (or just a separate file of loads) and characters' ids system to link them with texture
 different game "scenes" - levels basically
+Add windows letterboxing option
 
 pull out Raylib's update and draw (delta)time alike GetFrameTime() to measure performance costs (from rcore.c line 880)
 draw text stats&metrics for debug
-error handling and output - "falied to load ..." (investigate what is try/catch (throw)) - or assert???
+error handling and output - "falied to load ..." (investigate what is try/catch (throw)) - or assert??? - Yea, use asserts
 write tests (unittests i guess (do I need them?))
 saves - game state (serialization?)
 timestamps - UPS - game logic(physics etc) has to update at fixed rate (60 per sec) - not necessary
@@ -67,7 +78,7 @@ maybe consider more jump help like edge detection -  https://youtu.be/3sWTzMsmdx
 find out how to reverse sounds (without duplicating every sound in reverse and swapping them - it will be a nightmare)
 pack structs efficiently??? (alignment, packing, padding) - to reduce reverse data in memory
 
-try level editors - LDtk, Tiled
+try level editors - LDtk, Tiled, or make custom w/ Dear-ImGUI/raylib (Are you insane!?), or wait for new raylib Editor...
 try OpenGL integration
 try online sockets
 try Box2D physics (or Chipmunk2D)
@@ -76,15 +87,29 @@ refctor - maybe write corresponding declaration in it's modules - draw, load, e.
 try to "static link mingw32 libraries" i guess - put all dll libs into exe file for release/shipping
     https://youtu.be/fVJHmGPfsEk?si=919unMBLcmKsRhUf&t=470
 try raylib SDL backend (for better fullscreening )- setup - https://youtu.be/CfeHFIP_xEI?si=SpnQzOm76Wk5GqeW&t=994
+try to build project with bash file instead of CMake, like in handmade hero 
+    (and call raylib's cmake if it needs to be rebuilt?? or just call&rebuild raylib from clion)
+    
+
+-- Raylib stuff:
+Raylib tracelog toggle: utils.c -line 62 - maybe toggle raylib's log messages in some game config file (later)
+GetTime() doesn't stop counting even on program pause/break! Wow.
+screen recording (CTRL + F12) is broken ?? slows down fps to ~10 (???) - but actually doesn't break game - turn off?
+raylib supports OpenGl 4.3 ? then why does it runs on 3.3 now? -try 4.3, maybe it's faster
+    https://github.com/raysan5/raylib/wiki/raylib-platforms-and-graphics
 
 
 --Performance:
-As of 15.06.24 game runs at ~400us (microseconds) each frame, or 500us if dragging mouse, 450us if borderless,
-    650us if Nvidia Shadowplay - measured by custom measure_time() prototype profiling func
+Clock resolution of measure_time  ~ <= 0.2us (microsecond), raylib's GetTime() resolution = ~ 0.1-0.2us (WIN 10) which
+uses windows' QueryPerformanceCounter() - whose resolution = 0.1us
+maybe try later "__rdtsc()" (asm opcode RDTSC) - resolution < 10ns !!! (deeper asm knoledge needed)
+As of 15.06.24 game runs at ~400us (microseconds) each frame, 500us if dragging mouse (+100us if moving fast, only windowed),
+    450us if borderless, 650us if Nvidia Shadowplay - measured by custom measure_time() prototype profiling func
     Dont want to drop below 1ms(1000fps) on my pc, so look out for bottlenecks.
 15.06.24 - ~0.5ms
 ...
 
+DO NOT OPTIMIZE PREMATURELY, IT'S A WASE OF TIME, PERFORMANCE SENSITIVE CODE IS ~10% - JBlow. OPTIMISE AFTER SOLDOWN STARTS.
 --Problems:
    -Screen tearing occurs when Vsync is off - I cant find VRR option in OpenGL - to render any fps(1000) without tearing
         (e.g. in Hollow Knight there is no tearing no matter fps: 30 - 300, vsync off, on second 60Hz monitor)
@@ -101,6 +126,7 @@ As of 15.06.24 game runs at ~400us (microseconds) each frame, or 500us if draggi
         
    -Audio system is broken - on 1500+ fps there is a small digital noise regardless of volume, even if muted - WTF
    -Fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)
+   -Black flash when alt tabbing - in borderless - glfw jerking around, or Windows.
    -Performance slowdown - might be a bottleneck(probably fine) - when on primary 1440p display in borderless mode
         fps is dropping form ~2500 to ~1700, frametime: ~0,3-4ms to ~0,5ms, in ToggleFullscreen() it's rising up to 3000fps!
         Found the cause - nvidia shadowplay! (it's switching to game window in borderless)- slowing ~33% performance
@@ -118,7 +144,6 @@ As of 15.06.24 game runs at ~400us (microseconds) each frame, or 500us if draggi
            File: D:/!!!Projects/CPP/RayLibGame/raylib/src/external/miniaudio.h, Line 51578
            Expression: pResampler->inTimeInt == 0
            Process finished with exit code 3
-
 
 
 Don't be afraid to delete parts of code!

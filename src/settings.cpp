@@ -18,7 +18,7 @@ void toggle_vsync(){
     _vsync = ! _vsync;
 }
 
-void toggle_borderless(){
+void toggle_borderless(){ // Great, Raylib has his own ToggleBorderlessWindowed() now ...
     static int saved_width = GetScreenWidth();
     static int saved_height =  GetScreenHeight();
     if (_is_borderless){ //Restore Windowed mode

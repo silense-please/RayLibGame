@@ -54,18 +54,6 @@ void static_objects_draw(Game_Level level, Texture2D texture, char object_symbol
 }
 
 
-// Draw resized target render texture on the screen (Final draw)
-void draw_render_texture(RenderTexture2D& target){
-    BeginDrawing();
-    ClearBackground(LIGHTGRAY);
-    // Draw render texture to screen, properly scaled
-    DrawTexturePro(target.texture, (Rectangle){ 0.0f, 0.0f, (float)target.texture.width, (float)-target.texture.height},
-                   (Rectangle){(GetScreenWidth() - ((float)initial_window_width*scale_x))*0.5f, (GetScreenHeight() - ((float)initial_window_height*scale_y))*0.5f,
-                               (float)initial_window_width*scale_x, (float)initial_window_height*scale_y }, (Vector2){ 0, 0 }, 0.0f, WHITE);
-    EndDrawing(); // "Target FPS" lock slows fps here
-
-}
-
 // Draw animation from one row spritesheet
 void draw_player_animation(Player player, Animation &animation){
     int frames = animation.texture.width / TILESIZE;
