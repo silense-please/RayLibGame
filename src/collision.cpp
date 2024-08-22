@@ -38,8 +38,8 @@ void static_object_collision_by_speed(Player &player, Game_Level level) {
                         }
                     }
                     //Check if player is standing on the ground
-                    const float EPSILON = 0.01f;
-                    if (abs(player.y + player.height - y*TILESIZE) <= EPSILON && !player.started_jumping){
+                    const float COLLISION_EPSILON = 0.01f;
+                    if (abs(player.y + player.height - y*TILESIZE) <= COLLISION_EPSILON && !player.started_jumping){
                         player.is_standing = true;
                     }
                 }
@@ -76,7 +76,7 @@ void static_object_collision_by_speed(Player &player, Game_Level level) {
 }
 
 //If player is stuck inside collision push him out
-void static_object_collision_by_coordinates(Player &player, Game_Level level){ // VERSION 2
+void prevent_collision_stuck(Player &player, Game_Level level){
     //player.is_standing = false;
     for (int x = 0; x < level.width; ++x) {
         for (int y = 0; y < level.height; ++y) {

@@ -6,6 +6,7 @@
 
 //#include <cmath> //DO I NEED THIS ?
 #include "raylib.h"
+#include "raymath.h"        // Required for: Vector2Clamp()
 #include <fstream>
 #include <iostream>
 #include <unordered_map>
@@ -19,11 +20,13 @@ using std::abs;
 #define TILESIZE 64.0f
 
 #define MAKE_STRING(VARIABLE) (#VARIABLE) //STRINGIZING - this is just for convenicense of printing, for debugging, MIGHT BE DANGEROUS
-#define PRINT_INTEGER(VAR) ("%s: %d\n"), (MAKE_STRING(VAR)), (VAR)   // prints name of variable and it's int value
-#define PRINT_FLOAT(VAR)   ("%s: %f\n"), (MAKE_STRING(VAR)), (VAR)  // prints name of variable and it's float value
+#define PRINT_INT(VAR) ("%s: %d\n"), (MAKE_STRING(VAR)), (VAR)   // prints name of variable and it's int value
+#define PRINT_FLOAT(VAR)   ("%s: %.4f\n"), (MAKE_STRING(VAR)), (VAR)  // prints name of variable and it's float value
 //DrawText(TextFormat("standing: %d", player.is_standing), 10, 40, 20, LIME); - Replaces something like that
 //DrawText(TextFormat( PRINT_INTEGER(player.is_standing) ), 10, 40, 20, LIME); - with that.
 
+#define MAX(a, b) ((a)>(b)? (a) : (b))
+#define MIN(a, b) ((a)<(b)? (a) : (b))
 
 //@ Pre-Underscore all global variables?
 //Pre-underscore-d variables are internal config flags(states) - modify them cautiously
@@ -35,19 +38,20 @@ bool _is_paused = false;
 bool _is_menu = false;
 bool free_cam = false; // free camera for debug mode
 int total_errors = 0; // @ Need to make error system later
-int window_width = 1280; // maybe '_' (internal) too
-int window_height = window_width / 1.77777f; // - 16/9
-//initial "source" screen resolution
-const int initial_window_width = window_width;
-const int initial_window_height = window_height;
+const int screen_width = 1280; // initial "base/source" screen resolution, gameplay calculated from this.
+const int screen_height = screen_width / 1.77777f; // - 16/9
+int _window_width = screen_width; // actual window width & height minus letterboxing
+int _window_height = screen_height;
 Vector2 window_position;  //Position of game window on monitor in pixels
+bool letterboxing = true;
+
 // window resolution scale
-float scale_x = 1.0f; // @Group them into struct(maybe even Vector) - scale.x /.y
-float scale_y = 1.0f;
+float screen_scale_x = 1.0f; // @Group them into struct(maybe even Vector) - scale.x /.y
+float screen_scale_y = 1.0f;
+float screen_scale_min = 1.0f;
 double delta_time = 0; //in-game physics time delta in seconds (could be paused or reversed or slowed)
 
-float scaled_mouse_x = 0; // @Group them also
-float scaled_mouse_y = 0;
+Vector2 scaled_mouse = {0, 0};
 
 int active_gamepad = 0;
 const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config - not hooking for some reason
@@ -56,6 +60,8 @@ const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config
 // @ Those probably shoud be const instead of define
 // (actually not even const for some, just global variables that are hard to change(underscored also?))
 #define GAME_SPEED 1.0 // for slow-mo  @ Change to mutable?
+#define DEFAULT_ZOOM 1.4
+
 #define WALK_SPEED 600.0f
 #define GRAVITATION 2000.0f
 #define JUMP_POWER 1000
@@ -70,7 +76,7 @@ const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config
 
 //Input bindings - be wary of same key duplicating to multiple buttons
 #define MAX_BUTTON_BINDINGS 5
-string BUTTON_TOGGLE_BORDERLESS[MAX_BUTTON_BINDINGS]  {"KEY_F","GAMEPAD_BUTTON_RIGHT_FACE_LEFT"};
+string BUTTON_TOGGLE_BORDERLESS[MAX_BUTTON_BINDINGS]  {"KEY_F11"};
 string BUTTON_DEBUG_INFO[MAX_BUTTON_BINDINGS]  {"KEY_I"};
 string BUTTON_FRAMELOCK[MAX_BUTTON_BINDINGS]  {"KEY_L"};
 string BUTTON_VSYNC[MAX_BUTTON_BINDINGS]  {"KEY_V"};
@@ -157,7 +163,6 @@ enum menu_button{
 };
 
 // Settings functions
-void apply_screen_scale();
 void toggle_framelock();
 void toggle_borderless();
 void toggle_fullscreen();
@@ -179,13 +184,13 @@ void process_input(Player &player, Camera2D &camera, Game_Level current_level);
 void show_collision(Player player, Game_Level level);
 void level_borders_collision(Player &player, Game_Level &level);
 void static_object_collision_by_speed(Player &player, Game_Level level);
-void static_object_collision_by_coordinates(Player &player, Game_Level level);
+void prevent_collision_stuck(Player &player, Game_Level level);
 
 // Draw functions
 void draw_gamepads();
 void gamepad_disconnect_warning();
 void draw_debug_info();
-void static_objects_draw(Game_Level level, Texture2D texture, char object_symbol);
+void static_objects_draw(Game_Level level, Texture2D &texture, char object_symbol);
 void draw_render_texture(RenderTexture2D &target);
 
 // Debugging

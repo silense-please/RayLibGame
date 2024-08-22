@@ -19,9 +19,10 @@ animation system and grouping
 
 --IN PROGRESS
 Ремувай рендер текстуру нахер, скейли зумом камеры (чтоб зум как в backups\PLAYER_SCALE.PNG), (потом) добавь 16/10 и леттербоксинг для остальных соотношений либо стетч картинки рендер текстурой уже пост фактум - чтоб рендер текстура инчего не скейлила
-(А как текст скейлить???) можно растягивать рендер текстурой и фигачить поверх всего в конце дроу, только не делать ClearBackground чтоб оно накладывалось поверх фрейма
+(А как текст скейлить???) можно растягивать рендер текстурой и фигачить поверх всего в конце дроу, только не делать ClearBackground чтоб оно накладывалось поверх фрейма - криво будет, растягивай вручную
 
 make RPG-7
+add left stick movement
 
 --TODO - make test game (engine demo) - КОРОЧЕ ДЕЛАЙ УЖЕ МЕХАНИКИ ИГРЫ, А ВСЯКИЕ ВТОРОСТЕПЕННЫЕ МЕНЮ ПОТОМ
 event triggers in level , text in level (somewhere between the sacred ...)
@@ -31,6 +32,7 @@ sound (witness) system (sorry)
 --FINISH DEMO
 Make button input config (txt) file and load bindings from it
 Cleanup after "engine v1" done - sweep comments, restructure, fill declaration.cpp, make "debug" and release game mode e.t.c
+windows icon?
 compile release build and test it on VM and then on dimkanet's PC
 LATER-try to build for android lol (bad idea, it'll be exhausting)
 
@@ -51,6 +53,7 @@ JUST LEAVE RESOLUTION HARDCODED TO 720p FOR NOW, ITS FINE. mb fix camera jitteri
 jump start amination -  ноги поджимать при начале прыжка
 
 --AFTER DEMO:
+Подогнать все размеры спрайтов и игрока под "зум = 1" по умолчанию
 Try to reverse (play with) audio in standalone miniaudio test app
 How to include windows.h without funcs duplicating error?
 add proper flags (to player struct?) to player for switching animations and stuff - started_jump/walking/idle/falling
@@ -64,7 +67,7 @@ Add windows letterboxing option
 
 pull out Raylib's update and draw (delta)time alike GetFrameTime() to measure performance costs (from rcore.c line 880)
 draw text stats&metrics for debug
-error handling and output - "falied to load ..." (investigate what is try/catch (throw)) - or assert??? - Yea, use asserts
+error handling and output - "falied to load ..." (investigate what is try/catch (throw)) - or assert??? - Yea, use asserts (__FILE__ and __LINE__ will be helpfull)
 write tests (unittests i guess (do I need them?))
 saves - game state (serialization?)
 timestamps - UPS - game logic(physics etc) has to update at fixed rate (60 per sec) - not necessary
@@ -136,7 +139,7 @@ DO NOT OPTIMIZE PREMATURELY, IT'S A WASE OF TIME, PERFORMANCE SENSITIVE CODE IS 
    -Txt level dimensions are hardcoded (maybe just expand them - MAX_DIMENSIONS)
    -Cursor is disappearing in borderless with discord or OBS - Well... what can I do?
    -FPS Monitor (sometimes?) crashes SFML window upon closing FPS Monitor
-   -Pushing out of stuck in static_object_collision() don't work properly
+   -Pushing out of stuck in prevent_collision_stuck() don't work properly
    -Crash of miniaudio? Game just froze and crashed after a while(running ~2min max)
        maybe just Windows is memeing -lot of apps were opened , OR maybe I need to get rid of miniaudio
            Assertion failed!

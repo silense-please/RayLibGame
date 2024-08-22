@@ -1,10 +1,3 @@
-//Apply window contents scaling
-void apply_screen_scale(){
-    if(IsWindowResized()) {
-        scale_x = (float)GetScreenWidth() / initial_window_width;
-        scale_y = (float)GetScreenHeight() / initial_window_height;
-    }
-}
 
 void toggle_framelock(){
     if (_fps_lock){SetTargetFPS(0);}
@@ -16,6 +9,9 @@ void toggle_vsync(){
     if (_vsync){ ClearWindowState(FLAG_VSYNC_HINT);}
     else{SetWindowState(FLAG_VSYNC_HINT);}
     _vsync = ! _vsync;
+    //@Bug: Something weird is going on whith vsync (input lag and high cpu usage) but if you target lock to monitor refresh rate first and then turn on vsync it's fine
+    // useful stuff: GetMonitorRefreshRate() - to lock fps with that before vsyncing
+    //DrawRectangle(scaled_mouse.x, scaled_mouse_y,5,5,RED ); - to see input lag
 }
 
 void toggle_borderless(){ // Great, Raylib has his own ToggleBorderlessWindowed() now ...

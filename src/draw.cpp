@@ -41,18 +41,18 @@ void draw_debug_info(){
     }
     draw_gamepads();
     gamepad_disconnect_warning();
+
 }
 
 
-void static_objects_draw(Game_Level level, Texture2D texture, char object_symbol){
+void static_objects_draw(Game_Level level, Texture2D &texture, char object_symbol){
     for (int x = 0; x < level.width; ++x) {
         for (int y = 0; y < level.height; ++y) {
             if (level.data[x][y] == object_symbol)
-                DrawTextureEx(texture, (Vector2){(float)x*64, (float)y*64}, 0, 1, WHITE);
+                DrawTextureEx(texture, (Vector2){(float)x*TILESIZE, (float)y*TILESIZE}, 0, 1, GRAY);
         }
     }
 }
-
 
 // Draw animation from one row spritesheet
 void draw_player_animation(Player player, Animation &animation){

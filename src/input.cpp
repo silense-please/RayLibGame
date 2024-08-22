@@ -393,22 +393,45 @@ void process_input(Player &player, Camera2D &camera, Game_Level current_level) {
     }
 
     switch_active_gamepad();
-    scaled_mouse_x = (GetMouseX() / scale_x) / camera.zoom + (camera.target.x - camera.offset.x / camera.zoom);
-    scaled_mouse_y = (GetMouseY() / scale_y) / camera.zoom + (camera.target.y - camera.offset.y / camera.zoom);
 
-    Vector2 mouse_delta = GetMouseDelta();
-    float scaled_mouse_dx = mouse_delta.x / scale_x / camera.zoom;
-    float scaled_mouse_dy = mouse_delta.y / scale_y / camera.zoom;
+/*    scaled_mouse.x = (GetMouseX() / screen_scale_x) / camera.zoom + (camera.target.x - camera.offset.x / camera.zoom);
+    scaled_mouse.y = (GetMouseY() / screen_scale_y) / camera.zoom + (camera.target.y - camera.offset.y / camera.zoom);
+    */
+    Vector2 mouse_delta = GetMouseDelta(); // @Declare globally?
+    if(letterboxing){
+        mouse_delta.x = mouse_delta.x / screen_scale_min / camera.zoom;
+        mouse_delta.y = mouse_delta.y / screen_scale_min / camera.zoom;
+    } else{
+        mouse_delta.x = mouse_delta.x / screen_scale_x / camera.zoom;
+        mouse_delta.y = mouse_delta.y / screen_scale_y / camera.zoom;
+    }
 
     if (IsButtonPressed(BUTTON_DEBUG_INFO)) _draw_debug_info = !_draw_debug_info;
     if (IsButtonPressed(BUTTON_FRAMELOCK)) toggle_framelock();
     if (IsButtonPressed(BUTTON_VSYNC)) toggle_vsync();
-    //if ((IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))  && IsKeyPressed(KEY_ENTER)) toggle_borderless();
-    if (IsKeyPressed(KEY_F11)) toggle_borderless(); // screw Alt Enter
+    if (
+        ( (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT))  && IsKeyPressed(KEY_ENTER) )
+        || ( (IsButtonPressed(BUTTON_TOGGLE_BORDERLESS)) )
+        )
+        toggle_borderless();
+
     toggle_fullscreen(); //@Unfinished
-    apply_screen_scale();
 
-
+    { /// Apply screen scale
+        if (IsWindowResized()) {
+            screen_scale_x = (float) GetScreenWidth() / screen_width;
+            screen_scale_y = (float) GetScreenHeight() / screen_height;
+            screen_scale_min = MIN(screen_scale_x, screen_scale_y);
+            if(screen_scale_x <= screen_scale_y){
+                _window_width = GetScreenWidth();
+                _window_height = _window_width / 1.77777f;
+            }
+            else{
+                _window_height = GetScreenHeight();
+                _window_width = _window_height * 1.77777f; // @!!!! THIS IS BROKEN - ONE PIXEL OFF - REWRITE
+            }
+        }
+    }
     if (!_is_menu) {
 
         { /// JUMP
@@ -447,15 +470,16 @@ void process_input(Player &player, Camera2D &camera, Game_Level current_level) {
         else { player.speed_x = 0; player.is_walking = false;}
 
 
-        if (IsButtonDown(BUTTON_MMB) && free_cam) { //FREE CAMERA DRAG
-            camera.target.x -= scaled_mouse_dx;
-            camera.target.y -= scaled_mouse_dy;
+        if (IsButtonDown(BUTTON_RMB) /*&& free_cam*/) { //FREE CAMERA DRAG
+            free_cam = true;
+            camera.target.x -= mouse_delta.x;
+            camera.target.y -= mouse_delta.y;
             SetMouseCursor(9);
         } else { SetMouseCursor(0); }
 
         if (IsButtonPressed(BUTTON_LMB)) { //TELEPORT
-            player.x = scaled_mouse_x - player.width / 2;
-            player.y = scaled_mouse_y - player.height / 2;
+            player.x = scaled_mouse.x - player.width / 2;
+            player.y = scaled_mouse.y - player.height / 2;
 
             player.falling_time = INITIAL_FALLING_TIME;
             //player.air_time = 0;
@@ -463,7 +487,7 @@ void process_input(Player &player, Camera2D &camera, Game_Level current_level) {
             player.speed_y = 0;
         }
         if (IsButtonPressed(BUTTON_FREECAM)) { //FREE CAMERA TOGGLE
-            if (free_cam) camera.zoom = 1; //@Add default zoom later
+            if (free_cam) camera.zoom = DEFAULT_ZOOM;
             free_cam = !free_cam;
         }
     } // endif !_is_menu

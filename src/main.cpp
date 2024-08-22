@@ -12,14 +12,15 @@ int main(void){
 
 
     /// Initialization
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_WINDOW_ALWAYS_RUN ); // |FLAG_VSYNC_HINT);
-    InitWindow(window_width, window_height, "RAYLIB-DEMO");
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE /*| FLAG_MSAA_4X_HINT*/ | FLAG_WINDOW_ALWAYS_RUN ); // |FLAG_VSYNC_HINT);
+    InitWindow(screen_width, screen_height, "RAYLIB-DEMO");
     //SetMouseCursor(0);
 
     // Render texture initialization - to hold the rendering result and be able to resize it
-    RenderTexture2D render_texture = LoadRenderTexture(window_width, window_height);
+    RenderTexture2D render_texture = LoadRenderTexture(screen_width, screen_height);
 
     //toggle_borderless(); // Set borderless at startup
+
 
     Image game_icon = LoadImage("Game_Data/game_icon.png");
     SetWindowIcon(game_icon);
@@ -55,17 +56,22 @@ int main(void){
             {PLAYER_JUMP_START, {LoadTexture("Game_Data/animations/player_jump_start.png"), 0.1, false}},
             {PLAYER_LANDED,     {LoadTexture("Game_Data/animations/player_fall_end.png"),0.05, false}},
     };
+    // Default wrapping (repeat) distorts edges of sprites when they're scaled imperfectly (e.g. on camera zoom = 1.6).
+    for ( auto& anim : anims_player) { // anim.first is a 'const' key, anim.second is a value.
+        SetTextureWrap(anim.second.texture, TEXTURE_WRAP_CLAMP);
+    }
+    // @ Also generate mipmaps? We're gonna have to make high-res textures than, so they can be squeezed.
+    //GenTextureMipmaps(&anims_player[PLAYER_IDLE].texture);
 
     //@TESTING
-    //GenTextureMipmaps(&anims_player[PLAYER_IDLE].texture);
     //SetTextureFilter(anims_player[PLAYER_IDLE].texture, TEXTURE_FILTER_ANISOTROPIC_16X);
     //SetTextureFilter(render_texture.texture, TEXTURE_FILTER_BILINEAR);
-    //SetTextureWrap(anims_player[PLAYER_IDLE].texture, TEXTURE_WRAP_CLAMP);
-
 
 
     Texture2D background_texture = LoadTexture("Game_Data/background.png");
     Texture2D ground_texture = LoadTexture("Game_Data/ground.png");
+    //SetTextureWrap(ground_texture, TEXTURE_WRAP_CLAMP);
+    //SetTextureFilter(ground_texture, TEXTURE_FILTER_BILINEAR);
 
 
     Player player;
@@ -73,14 +79,15 @@ int main(void){
     load_level(current_level);
     load_player_spawn(current_level, player);
 
-    Camera2D camera = {(Vector2){(float)window_width /2, (float)window_height /2},
-                       (Vector2){ (float)window_width /2, (float)window_height /2 },0,1.5};
+    Camera2D camera =
+        {(Vector2){(float)screen_width / 2, (float)screen_height / 2},
+         (Vector2){(float)screen_width / 2, (float)screen_height / 2 }, 0, DEFAULT_ZOOM};
 
     const int MENU_BUTTONS = 2;
     Menu_Button menu_btns[MENU_BUTTONS]
             {
-                    {BTN_RESUME,"RESUME",(float)window_width/2 -125, 200, },
-                    {BTN_QUIT,  "QUIT",  (float)window_width/2 -125, 400, }
+                    {BTN_RESUME,"RESUME", (float)screen_width / 2 - 125, 200, },
+                    {BTN_QUIT,  "QUIT",   (float)screen_width / 2 - 125, 400, }
             };
 
     InitAudioDevice();
@@ -107,7 +114,7 @@ int main(void){
         /// Process Input
         if(_is_menu){
             for (int i = 0; i < MENU_BUTTONS; ++i) {
-                if (CheckCollisionPointRec((Vector2) {GetMouseX() / scale_x, GetMouseY() / scale_y},
+                if (CheckCollisionPointRec((Vector2) {GetMouseX() / screen_scale_x, GetMouseY() / screen_scale_y}, //@ Scaled mouse maybe???
                                            (Rectangle) {menu_btns[i].x, menu_btns[i].y, menu_btns[i].width,
                                                         menu_btns[i].height})) {
                     menu_btns[i].state = 1;
@@ -150,16 +157,31 @@ int main(void){
             player.x += player.speed_x * delta_time;
             player.y += player.speed_y * delta_time;
 
-            static_object_collision_by_coordinates(player, current_level);
+            prevent_collision_stuck(player, current_level);
 
             level_borders_collision(player, current_level);
 
         }
 
-
         camera.zoom += ((float)GetMouseWheelMove() * 0.1f); //(0.1f*camera.zoom));
         if(!free_cam) // Camera just follows player for now
             camera.target = (Vector2){ player.x + player.width/2, player.y + player.height/2};
+
+        //WARNING: This should be the same as in prcess input(or make func already); Ideally this shouldn't duplicate at all
+        //scaled_mouse.x = (GetMouseX() / screen_scale_x) / camera.zoom + (camera.target.x - camera.offset.x / camera.zoom);
+        //scaled_mouse.y = (GetMouseY() / screen_scale_y) / camera.zoom + (camera.target.y - camera.offset.y / camera.zoom);
+
+        if(letterboxing){
+            SetMouseScale(1/screen_scale_min, 1/screen_scale_min);
+            SetMouseOffset(-(GetScreenWidth() - _window_width)*0.5f, -(GetScreenHeight() - _window_height)*0.5f);
+        } else {
+                SetMouseScale(1/screen_scale_x, 1/screen_scale_y);
+        }
+
+        scaled_mouse.x = ((GetMouseX() )) / camera.zoom + (camera.target.x - camera.offset.x / camera.zoom);
+        scaled_mouse.y = ((GetMouseY() )) / camera.zoom + (camera.target.y - camera.offset.y / camera.zoom);
+        //Vector2Clamp(scaled_mouse, (Vector2){0,0}, (Vector2){(float)screen_height,(float)screen_width});
+        // @WHY DO I NEED THIS? (clamped mouse value behind game screen)
 
         /// Game Logic
         // stuff like sound, event triggers, animations logic will be here (everything that isn't Input or Draw)
@@ -232,20 +254,34 @@ int main(void){
             reset_animation(anim.second);
         }
 
-//        for ( auto& [name, anim] : anims_player) { // C++17 fancy version - test speed
+//        for ( auto& [name, anim] : anims_player) { // C++17 fancy version - @Test speed. (of C++17 also)
 //            reset_animation(anim);
 //        }
 
 
-        /// Draw everything to target texture to enable window scaling/stretching
+        /// Draw everything to target texture to enable window stretching
+        //BeginDrawing();
+        if (IsWindowResized()){
+            UnloadRenderTexture(render_texture);
+            render_texture = LoadRenderTexture(_window_width, _window_height); // We can't just change width & height, we need to reload render texture to properly change it's size.
+        }
         BeginTextureMode(render_texture);
         {
-            ClearBackground(LIGHTGRAY);
-            BeginMode2D(camera);
+            ClearBackground(ORANGE);
+
+            Camera2D game_screen_scaler = camera; // We scale screen resolution by zooming camera
+            game_screen_scaler.zoom *= screen_scale_min;
+            game_screen_scaler.offset.x = (float)_window_width * 0.5f;
+            game_screen_scaler.offset.y = (float)_window_height * 0.5f;
+
+            BeginMode2D(game_screen_scaler);
             {
-                DrawTextureEx(background_texture, (Vector2) {(float) 0, (float) 0}, 0, 3, WHITE);
+                DrawTextureEx(background_texture, (Vector2) { 0,  0}, 0, 3, WHITE);
                 //draw player collision box
                 if(_draw_debug_info)DrawRectangleRec((Rectangle){player.x, player.y, player.width, player.height}, RED);
+
+                DrawRectangle(scaled_mouse.x-2, scaled_mouse.y-2,5,5,RED );
+
 
                 { // Draw player func
                     if (anims_player[PLAYER_LANDED].is_playing){
@@ -271,62 +307,88 @@ int main(void){
                 }
 
                 static_objects_draw(current_level, ground_texture, 'G');
-            } EndMode2D();
 
-            if (_is_menu) {
-                BeginBlendMode(2);
-                DrawRectangle(0, 0, window_width, window_height, (Color) {0, 0, 0, 70});//darken the game when menu opened
-                EndBlendMode();
+            } EndMode2D(); // scaled_camera
 
-                for (int i = 0; i < MENU_BUTTONS; ++i) {
-                    DrawRectangle(menu_btns[i].x, menu_btns[i].y, menu_btns[i].width, menu_btns[i].height,
-                                  (menu_btns[i].state == 0) ? menu_btns[i].color : LIME);
-                    DrawText(menu_btns[i].label, menu_btns[i].x, menu_btns[i].y, 40, BLACK);
+
+            Camera2D overlay_screen_scaler = camera; // We scale screen resolution by zooming camera
+            overlay_screen_scaler.target.x = (float)screen_width * 0.5f;
+            overlay_screen_scaler.target.y = (float)screen_height * 0.5f;
+            overlay_screen_scaler.zoom = screen_scale_min;
+            overlay_screen_scaler.offset.x = (float)_window_width * 0.5f;
+            overlay_screen_scaler.offset.y = (float)_window_height * 0.5f;
+
+            BeginMode2D(overlay_screen_scaler);
+            {  /// Overlay (everything that is not the game)
+                if (_is_menu)
+                {
+                    BeginBlendMode(2);
+                    DrawRectangle(0, 0, screen_width, screen_height, (Color) {0, 0, 0, 70});//darken the game when menu opened
+                    EndBlendMode();
+
+                    for (int i = 0; i < MENU_BUTTONS; ++i) {
+                        DrawRectangle(menu_btns[i].x, menu_btns[i].y, menu_btns[i].width, menu_btns[i].height,
+                                      (menu_btns[i].state == 0) ? menu_btns[i].color : LIME);
+                        DrawText(menu_btns[i].label, menu_btns[i].x, menu_btns[i].y, 40, BLACK);
+                    }
+                }
+                if (_is_paused) DrawText("PAUSED", 500, 50, 60, LIME);
+
+                { /// DRAW DEBUG INFO
+                    if (_draw_debug_info) draw_debug_info(); //@Maybe just put func contents here
+                    show_collision(player,current_level); //@Temporary - maybe move to draw_debug_info after collision system is finished
+
+                    //@Temporary - move to draw debug info later
+                    DrawRectangle(0,0,250,400,Color{0,0,0,180}); // Debug info opacity
+
+                    DrawText(TextFormat(PRINT_INT(player.has_landed)), 10, 40, 20, player.has_landed == 1 ? ORANGE : LIME);
+                    DrawText(TextFormat(PRINT_INT(player.is_standing)), 10, 80, 20, player.is_standing == 1 ? ORANGE : LIME);
+
+                    //DrawText(TextFormat(PRINT_INT(_vsync)), 10, 200, 20,_vsync == 0 ? ORANGE : LIME);
+                    //DrawText(TextFormat(PRINT_INT(_fps_lock)), 10, 240, 20,_fps_lock== 0 ? ORANGE : LIME);
+
+                    DrawText(TextFormat(PRINT_FLOAT(scaled_mouse.x)), 10, 240, 20,LIME);
+                    DrawText(TextFormat(PRINT_FLOAT(game_screen_scaler.zoom)), 10, 280, 20, LIME);
+                    DrawText(TextFormat("avg time %.4f us", average_measured_time), 10, 320, 20, LIME);
+
+                    if (free_cam) DrawText("FREE CAMREA", 700, 100, 40, DARKGREEN);
+
+                    DrawText(TextFormat( "%.4fms", GetFrameTime() *1000), 120, 10, 20, LIME);
+                    DrawFPS(10,10);
                 }
             }
+            EndMode2D(); //Overlay scaler
 
-            if (_is_paused) DrawText("PAUSED", 500, 50, 60, LIME);
+        }
+        EndTextureMode();
+        //EndDrawing(); // "Target FPS" lock slows fps here
 
-            if (_draw_debug_info) draw_debug_info(); //@Maybe just put func contents here
-            show_collision(player,current_level); //@Temporary - maybe move to draw_debug_info after collision system is finished
-
-            //@Temporary - move to draw debug info later
-            DrawRectangle(0,0,250,400,Color{0,0,0,180}); // Debug info opacity
-            //DrawText(TextFormat("standing: %d", player.is_standing), 10, 40, 20, LIME);
-            //DrawText(TextFormat("jumping: %d", player.is_jumping), 10, 40, 20, LIME);
-            //DrawText(TextFormat("has landed: %d", player.has_landed), 10, 40, 20, LIME);
-            DrawText(TextFormat(PRINT_INTEGER(player.has_landed)), 10, 40, 20, player.has_landed == 1?ORANGE:LIME);
-            DrawText(TextFormat(PRINT_INTEGER(player.is_standing)), 10, 80, 20, player.is_standing == 1?ORANGE:LIME);
-
-
-            /*
-            DrawText(TextFormat("jump hold t: %f", player.jump_input_hold_time), 10, 120, 20, LIME);
-            DrawText(TextFormat("jump hold b: %d", player.is_holding_jump), 10, 160, 20, LIME);
-            DrawText(TextFormat("air time: %f", player.air_time), 10, 200, 20, LIME);
-
-            DrawText(TextFormat("Speed Y: %f", player.speed_y), 10, 280, 20, LIME);
-
-             */
-            DrawText(TextFormat(PRINT_FLOAT(camera.zoom)), 10, 200, 20, LIME);
-
-            DrawText(TextFormat("falling_time: %f ", player.falling_time), 10, 240, 20, LIME);
-            DrawText(TextFormat("%f us", average_measured_time), 10, 320, 20, LIME);
-
-            if (free_cam) DrawText("FREE CAMREA", 700, 100, 40, DARKGREEN);
-
-            DrawText(TextFormat( "%fms", GetFrameTime() *1000), 120, 10, 20, LIME);
-            DrawFPS(10,10);
-        } EndTextureMode();
-
-        { /// Draw resized target render texture on the screen, properly scaled (Final draw)
+        { /// Draw target render texture on the screen, properly scaled (Final draw)
             BeginDrawing();
-            ClearBackground(LIGHTGRAY);
+            ClearBackground(BLACK);
 
-            Rectangle source = { 0.0f, 0.0f, (float)render_texture.texture.width, (float)-render_texture.texture.height};
-            Rectangle dest = {((float)GetScreenWidth() - ((float)initial_window_width*scale_x))*0.5f, ((float)GetScreenHeight() - ((float)initial_window_height*scale_y))*0.5f, (float)initial_window_width*scale_x, (float)initial_window_height*scale_y };
-            Vector2 origin = { 0.0f, 0.0f };
+            if(letterboxing)
+            { ///LETTERBOX; @ fix virtual mouse
+                Rectangle source = { 0.0f, 0.0f, (float)render_texture.texture.width, (float)-render_texture.texture.height};
+                Rectangle dest = {(GetScreenWidth() - ((float)_window_width))*0.5f, (GetScreenHeight() - ((float)_window_height))*0.5f,(float)_window_width, (float)_window_height  };
+                Vector2 origin = { 0.0f, 0.0f };
+                DrawTexturePro(render_texture.texture, source, dest, origin, 0.0f, WHITE);
+            }
+            else
+            { /// STRETCH
+                Rectangle source = { 0.0f, 0.0f, (float)render_texture.texture.width, (float)-render_texture.texture.height};
+                Rectangle dest = {0,0,(float)GetScreenWidth(), (float)GetScreenHeight()};
+                Vector2 origin = { 0.0f, 0.0f };
+                DrawTexturePro(render_texture.texture, source, dest, origin, 0.0f, WHITE);
+            }
 
-            DrawTexturePro(render_texture.texture, source, dest, origin, 0.0f, WHITE);
+
+
+            // УДОЛИИИИИИИИИИИ
+            //DrawTextureRec(render_texture.texture, source, origin, WHITE);
+            //DrawTexturePro(render_texture.texture, (Rectangle){ 0.0f, 0.0f, (float)render_texture.texture.width, (float)-render_texture.texture.height}, (Rectangle){0, 0,(float)GetScreenWidth(), (float)GetScreenHeight() }, (Vector2){ 0, 0 }, 0.0f, WHITE);
+            //DrawTexturePro(render_texture.texture, (Rectangle){ 0.0f, 0.0f, (float)render_texture.texture.width, (float)-render_texture.texture.height }, (Rectangle){ (GetScreenWidth() - ((float)_window_width))*0.5f, (GetScreenHeight() - ((float)_window_height))*0.5f,(float)_window_width, (float)_window_height }, (Vector2){ 0, 0 }, 0.0f, WHITE);
+
 
             EndDrawing(); // "Target FPS" lock slows fps here
         }
