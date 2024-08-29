@@ -1,11 +1,11 @@
 // Very raw implementation of profiling the code chunks - how long will code take
 //@ Write properly how to use this, and also finish this:
-// unhardcode everything, add draw_debug_info switch(I mean if()), maybe draw to screen instead of cli
+// unhardcode everything, add draw_debug_info switch(I mean if())
 // GetTime() doesn't stop counting on a breakpoint program pause
-// Draw istead of printf() (investigate why printf or stdoutput is so slow)
 // Make it draw frametime graph later (like fpsMonitor)
 // How long is this function takes to execute?? - ~100 assembly inctructions, not clear where is GetTime
 
+//Clock resolution ~ <= 0.2us (microsecond)
 //Use of func
 //measure_time_start = GetTime(); <- Start measuring
 //  ... Some code here ...

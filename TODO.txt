@@ -15,11 +15,10 @@ camera - side-scrolling
 pause system (and UI)
  gravity and jumps
 make good jumps https://www.youtube.com/watch?v=Mo1-sKYbks0 https://www.youtube.com/watch?v=7KiK0Aqtmzc&t=216s
-animation system and grouping
+animation system and texture grouping
+screen proper scaling and stretching/letterboxing
 
 --IN PROGRESS
-Ремувай рендер текстуру нахер, скейли зумом камеры (чтоб зум как в backups\PLAYER_SCALE.PNG), (потом) добавь 16/10 и леттербоксинг для остальных соотношений либо стетч картинки рендер текстурой уже пост фактум - чтоб рендер текстура инчего не скейлила
-(А как текст скейлить???) можно растягивать рендер текстурой и фигачить поверх всего в конце дроу, только не делать ClearBackground чтоб оно накладывалось поверх фрейма - криво будет, растягивай вручную
 
 make RPG-7
 add left stick movement
@@ -31,8 +30,8 @@ sound (witness) system (sorry)
 
 --FINISH DEMO
 Make button input config (txt) file and load bindings from it
-Cleanup after "engine v1" done - sweep comments, restructure, fill declaration.cpp, make "debug" and release game mode e.t.c
-windows icon?
+Cleanup after "engine v1" done - sweep comments, restructure, fill declaration.cpp, e.t.c
+Windows icon?
 compile release build and test it on VM and then on dimkanet's PC
 LATER-try to build for android lol (bad idea, it'll be exhausting)
 
@@ -48,22 +47,24 @@ better not to reverse audio, but play it with changed pitch(a.k.a tempo) to -1, 
 https://github.com/benjamin-ab/Sound-Reverse/blob/master/reverse.c - NO, this just reverses whole track before outputting
 
 --ANIMATIONS & STUFF
-JUST LEAVE RESOLUTION HARDCODED TO 720p FOR NOW, ITS FINE. mb fix camera jittering later.
+LEAVE BASE RESOLUTION HARDCODED TO 720p, ITS FINE.
 сделать анимацию прыжка повыразительнее, чтобы он башкой тряс - как в холлоу найте ( и с одной ноги начинать прыгать)
 jump start amination -  ноги поджимать при начале прыжка
 
 --AFTER DEMO:
+clean up this todo
 Подогнать все размеры спрайтов и игрока под "зум = 1" по умолчанию
 Try to reverse (play with) audio in standalone miniaudio test app
 How to include windows.h without funcs duplicating error?
-add proper flags (to player struct?) to player for switching animations and stuff - started_jump/walking/idle/falling
 add draw smoothing to fast projectiles (e.g.rockets) - https://youtu.be/pnhJ5SDZpGU?si=scXMy6RU2_zMpQfC - TSoding
 add hot reloading system via dlls for debugging (TSoding, Karl Zylinski)
 rebuild(refactor) player accelerations to the real vectors
 mb collisions can be improved (collide by speed vectors) (the corners, step on platform if almost jumped high enough)
 Texture loading and unloading system (or just a separate file of loads) and characters' ids system to link them with texture
 different game "scenes" - levels basically
-Add windows letterboxing option
+Maybe add 16\10 screen ratio later
+Show info messages like "Letterboxing is ON" on the screen (for a few seconds) instead of console - Like Jon Blow's
+fit all animations and objects' dimentions(sizes) into default zoom (make default zoom = 1 and player height = ~84)
 
 pull out Raylib's update and draw (delta)time alike GetFrameTime() to measure performance costs (from rcore.c line 880)
 draw text stats&metrics for debug
@@ -110,6 +111,8 @@ As of 15.06.24 game runs at ~400us (microseconds) each frame, 500us if dragging 
     450us if borderless, 650us if Nvidia Shadowplay - measured by custom measure_time() prototype profiling func
     Dont want to drop below 1ms(1000fps) on my pc, so look out for bottlenecks.
 15.06.24 - ~0.5ms
+29.08.24 - Rendering "pipeline" reworked, now rendering is not in 720p, but in target resolution minus letterboxing
+            QHD ~760us, ~560us (no Shadowplay); FHD ~470us; HD ~330us;  - borderless, no mouse dragging
 ...
 
 DO NOT OPTIMIZE PREMATURELY, IT'S A WASE OF TIME, PERFORMANCE SENSITIVE CODE IS ~10% - JBlow. OPTIMISE AFTER SOLDOWN STARTS.
@@ -127,7 +130,8 @@ DO NOT OPTIMIZE PREMATURELY, IT'S A WASE OF TIME, PERFORMANCE SENSITIVE CODE IS 
         ma_CoCreateInstance() in ma_context_get_MMDevice__wasapi() FAILS (dig deeper)
         !!!FIXED(workaround) - https://github.com/karl-zylinski/raylib/commit/7a38578c89baf5f3c1d2e20250757b0301dc2643?diff=unified&w=1
         
-   -Audio system is broken - on 1500+ fps there is a small digital noise regardless of volume, even if muted - WTF
+   -Audio system is broken - on 1500+ fps there is a high pitch noise regardless of volume, even if muted - WTF
+        WOW, EVEN IN HOLLOW KNIGHT ON 200+ FPS THERE IS A NOISE (even on 120 actually); well I guess it's not my problem then.
    -Fix ToggleFullscreen by implementing code from SetWindowMonitor(which is sets fullscreen too in fact)
    -Black flash when alt tabbing - in borderless - glfw jerking around, or Windows.
    -Performance slowdown - might be a bottleneck(probably fine) - when on primary 1440p display in borderless mode

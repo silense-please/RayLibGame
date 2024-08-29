@@ -394,16 +394,13 @@ void process_input(Player &player, Camera2D &camera, Game_Level current_level) {
 
     switch_active_gamepad();
 
-/*    scaled_mouse.x = (GetMouseX() / screen_scale_x) / camera.zoom + (camera.target.x - camera.offset.x / camera.zoom);
-    scaled_mouse.y = (GetMouseY() / screen_scale_y) / camera.zoom + (camera.target.y - camera.offset.y / camera.zoom);
-    */
-    Vector2 mouse_delta = GetMouseDelta(); // @Declare globally?
+    ingame_mouse_delta = GetMouseDelta();
     if(letterboxing){
-        mouse_delta.x = mouse_delta.x / screen_scale_min / camera.zoom;
-        mouse_delta.y = mouse_delta.y / screen_scale_min / camera.zoom;
+        ingame_mouse_delta.x = ingame_mouse_delta.x / screen_scale_min / camera.zoom;
+        ingame_mouse_delta.y = ingame_mouse_delta.y / screen_scale_min / camera.zoom;
     } else{
-        mouse_delta.x = mouse_delta.x / screen_scale_x / camera.zoom;
-        mouse_delta.y = mouse_delta.y / screen_scale_y / camera.zoom;
+        ingame_mouse_delta.x = ingame_mouse_delta.x / screen_scale.x / camera.zoom;
+        ingame_mouse_delta.y = ingame_mouse_delta.y / screen_scale.y / camera.zoom;
     }
 
     if (IsButtonPressed(BUTTON_DEBUG_INFO)) _draw_debug_info = !_draw_debug_info;
@@ -414,24 +411,19 @@ void process_input(Player &player, Camera2D &camera, Game_Level current_level) {
         || ( (IsButtonPressed(BUTTON_TOGGLE_BORDERLESS)) )
         )
         toggle_borderless();
-
-    toggle_fullscreen(); //@Unfinished
-
-    { /// Apply screen scale
-        if (IsWindowResized()) {
-            screen_scale_x = (float) GetScreenWidth() / screen_width;
-            screen_scale_y = (float) GetScreenHeight() / screen_height;
-            screen_scale_min = MIN(screen_scale_x, screen_scale_y);
-            if(screen_scale_x <= screen_scale_y){
-                _window_width = GetScreenWidth();
-                _window_height = _window_width / 1.77777f;
-            }
-            else{
-                _window_height = GetScreenHeight();
-                _window_width = _window_height * 1.77777f; // @!!!! THIS IS BROKEN - ONE PIXEL OFF - REWRITE
-            }
-        }
+    if(IsKeyPressed(KEY_F10)) { //maybe F1?
+        letterboxing = !letterboxing;
+        if(letterboxing) printf("---Letterboxing is ON---\n");
+        else printf("---Letterboxing is OFF---\n");
     }
+    if(IsKeyPressed(KEY_F9)) { // maybe F2?
+        _screen_filtering = !_screen_filtering;
+        if(_screen_filtering) printf("---Screen Filtering is ON---\n");
+        else printf("---Screen Filtering is OFF---\n");
+    }
+
+    toggle_fullscreen(); //@Unfinished (check raylib's fullscreen, in v5.0 they fixed something)
+
     if (!_is_menu) {
 
         { /// JUMP
@@ -442,9 +434,9 @@ void process_input(Player &player, Camera2D &camera, Game_Level current_level) {
                 player.jump_input_buffer_time -= delta_time;
                 // JUMP!
                 if ((player.is_standing || player.air_time < COYOTE_TIME) && !player.is_jumping) {
-                    player.speed_y = -JUMP_POWER;
+                    player.speed.y = -JUMP_POWER;
                     player.jump_input_buffer_time = 0;
-                    player.falling_time = INITIAL_FALLING_TIME;
+                    player.time_of_fall = INITIAL_TIME_OF_FALL;
                     player.is_standing = false;
                     player.is_holding_jump = true;
                     player.is_jumping = true;
@@ -455,36 +447,37 @@ void process_input(Player &player, Camera2D &camera, Game_Level current_level) {
             player.acceleration_down = GRAVITATION;
             if (IsButtonDown(BUTTON_JUMP) && player.is_holding_jump) {
                 player.jump_input_hold_time += delta_time;
-            } else if (player.is_jumping) { // When jump button is released
+            } else if (player.is_jumping)
+            { // When jump button is released
                 if (player.jump_input_hold_time < MIN_JUMP_INPUT_HOLD_TIME)
                     player.jump_input_hold_time = MIN_JUMP_INPUT_HOLD_TIME;
-                player.acceleration_down = GRAVITATION * 0.8 * (MAX_JUMP_INPUT_HOLD_TIME / player.jump_input_hold_time);
+                player.acceleration_down = GRAVITATION * JUMP_SNAPPING_FACTOR * (MAX_JUMP_INPUT_HOLD_TIME / player.jump_input_hold_time);
                 player.is_holding_jump = false;
             }
         }
 
 
         /// RUN
-        if (IsButtonDown(BUTTON_MOVE_LEFT)) { player.speed_x = -WALK_SPEED; player.is_walking = true; player.facing_left=1;}
-        else if (IsButtonDown(BUTTON_MOVE_RIGHT)) { player.speed_x = WALK_SPEED; player.is_walking = true; player.facing_left=0;}
-        else { player.speed_x = 0; player.is_walking = false;}
+        if (IsButtonDown(BUTTON_MOVE_LEFT)) { player.speed.x = -WALK_SPEED; player.is_walking = true; player.facing_left=1;}
+        else if (IsButtonDown(BUTTON_MOVE_RIGHT)) { player.speed.x = WALK_SPEED; player.is_walking = true; player.facing_left=0;}
+        else { player.speed.x = 0; player.is_walking = false;}
 
 
         if (IsButtonDown(BUTTON_RMB) /*&& free_cam*/) { //FREE CAMERA DRAG
             free_cam = true;
-            camera.target.x -= mouse_delta.x;
-            camera.target.y -= mouse_delta.y;
+            camera.target.x -= ingame_mouse_delta.x;
+            camera.target.y -= ingame_mouse_delta.y;
             SetMouseCursor(9);
         } else { SetMouseCursor(0); }
 
         if (IsButtonPressed(BUTTON_LMB)) { //TELEPORT
-            player.x = scaled_mouse.x - player.width / 2;
-            player.y = scaled_mouse.y - player.height / 2;
+            player.x = ingame_mouse.x - player.width / 2;
+            player.y = ingame_mouse.y - player.height / 2;
 
-            player.falling_time = INITIAL_FALLING_TIME;
+            player.time_of_fall = INITIAL_TIME_OF_FALL;
             //player.air_time = 0;
-            player.speed_x = 0;
-            player.speed_y = 0;
+            player.speed.x = 0;
+            player.speed.y = 0;
         }
         if (IsButtonPressed(BUTTON_FREECAM)) { //FREE CAMERA TOGGLE
             if (free_cam) camera.zoom = DEFAULT_ZOOM;

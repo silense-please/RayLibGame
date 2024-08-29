@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 3.24)
 project(RayLibGame)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/raylib) #link "sub-project" with its own CmakeLists e.t.c
 #link_directories(LIBS_FOR_RELEASE_BUILD) # Links DLLs. Not needed when libs are statically linked.
 #target_link_libraries(${PROJECT_NAME} libstdc++.a libgcc_eh.a) # Links static CRT(libc) libs MANUALLY.
 
-add_executable(${PROJECT_NAME} src/main.cpp)
 
+add_executable(${PROJECT_NAME} src/main.cpp)
 
 # That's just for testing. 
 #add_executable(RayLibGame raylib/examples/core/core_window_letterbox.c)

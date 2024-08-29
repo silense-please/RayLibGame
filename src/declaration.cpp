@@ -38,20 +38,21 @@ bool _is_paused = false;
 bool _is_menu = false;
 bool free_cam = false; // free camera for debug mode
 int total_errors = 0; // @ Need to make error system later
-const int screen_width = 1280; // initial "base/source" screen resolution, gameplay calculated from this.
-const int screen_height = screen_width / 1.77777f; // - 16/9
-int _window_width = screen_width; // actual window width & height minus letterboxing
-int _window_height = screen_height;
+const int game_screen_width = 1280; // initial "base/source" screen resolution, gameplay calculated from this.
+const int game_screen_height = game_screen_width / 1.77777f; // - 16/9
+int _screen_width = game_screen_width; // actual window width & height minus letterboxing. (for window dimentions use ..
+int _screen_height = game_screen_height; //                                                       GetScreenWidth/Height)
 Vector2 window_position;  //Position of game window on monitor in pixels
 bool letterboxing = true;
+bool _screen_filtering = false;
 
 // window resolution scale
-float screen_scale_x = 1.0f; // @Group them into struct(maybe even Vector) - scale.x /.y
-float screen_scale_y = 1.0f;
+Vector2 screen_scale = {1.0f, 1.0f};
 float screen_scale_min = 1.0f;
 double delta_time = 0; //in-game physics time delta in seconds (could be paused or reversed or slowed)
 
-Vector2 scaled_mouse = {0, 0};
+Vector2 ingame_mouse = {0, 0}; // Game world mouse, adjusted for camera (overlay mouse is just GetMouseX/Y)
+Vector2 ingame_mouse_delta = {0, 0};
 
 int active_gamepad = 0;
 const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config - not hooking for some reason
@@ -60,7 +61,7 @@ const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config
 // @ Those probably shoud be const instead of define
 // (actually not even const for some, just global variables that are hard to change(underscored also?))
 #define GAME_SPEED 1.0 // for slow-mo  @ Change to mutable?
-#define DEFAULT_ZOOM 1.4
+#define DEFAULT_ZOOM 1.3
 
 #define WALK_SPEED 600.0f
 #define GRAVITATION 2000.0f
@@ -68,9 +69,10 @@ const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config
 //@Those could be const
 #define JUMP_INPUT_BUFFER_TIME 0.07
 #define COYOTE_TIME 0.07
-#define INITIAL_FALLING_TIME 0.00 // initial acceleration time of free fall - for faster falling
+#define INITIAL_TIME_OF_FALL 0.00 // initial acceleration time of free fall - could be >0 for faster falling
 #define MIN_JUMP_INPUT_HOLD_TIME 0.15
 #define MAX_JUMP_INPUT_HOLD_TIME 0.7
+#define JUMP_SNAPPING_FACTOR 0.8 // Bigger the value - faster the player is pulled to the ground after jump button is released.
 #define MAX_FALL_SPEED 1600.0
 
 
@@ -101,14 +103,13 @@ struct Player{
     float y = 0;
     float width = 32;
     float height = TILESIZE;
-    float speed_x = 0; //speed is the distance(step) player steps every frame
-    float speed_y = 0; //@Refactor - make it Vector(?) - player.speed.x
+    Vector2 speed = {0,0}; // Speed is the distance(step) player steps every frame.
     float acceleration_left = 0;
     float acceleration_right = 0;
-    float acceleration_up = 0; // maybe just horizontal acceleration
+    float acceleration_up = 0; // maybe just acceleration struct with four fields
     float acceleration_down = GRAVITATION;
 
-    double falling_time = 0; //@Rename? to time_of_fall
+    double time_of_fall = INITIAL_TIME_OF_FALL;
     double air_time = 0;
     double jump_input_buffer_time = 0; // Player jumps right after landing - even if pressed jump right before landing
     double jump_input_hold_time = 0;
