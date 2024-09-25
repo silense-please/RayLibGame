@@ -319,44 +319,62 @@ int main(void){
                     float player_center_x = (player.x + (player.width/2));
                     float player_center_y = (player.y + (player.height/2));
 
-                    //TODO: mouse&stick tracking, then missle launching point, then projectile, then explosion (steal particle animation from raylib demo); after this is done, clean up and move part of this in game logic
+                    //TODO:  make a holding arm just with a line or two, then mouse&stick tracking, then missle launching point, then projectile, then explosion (steal particle animation from raylib demo)
+                    // after this is done, clean up and move part of this in game logic
+
+
 
                     rpg.rotation += ((float)GetMouseWheelMove() * 5.0f); // debugging
 
-                    /// Actually, we dont need to store rotation when we'll have a mouse position updating every frame
+
+                    /// Actually, we dont need to store rotation when we'll have mouse position updating every frame
                     static bool previous_facing_left = player.facing_left;
                     if (previous_facing_left != player.facing_left){
                         rpg.rotation = -rpg.rotation;
                         previous_facing_left = player.facing_left;
                     }
+                    //if (abs(rpg.rotation) > 270) {source.height = -source.height;}
 
 
-                    int flip_h = player.facing_left ? -1: 1;
+                    //if (abs(rpg.rotation) > 90 && abs(rpg.rotation) <= 270) {center.y -= 8; center.x += 6;}
 
-                    Vector2 center = {rpg.width/2 -12*flip_h, rpg.height/2 +2}; // rotation point
-                    if (abs(rpg.rotation) > 90 && abs(rpg.rotation) <= 270) center = {rpg.width/2 -14*flip_h, rpg.height/2 +2};
 
-                    Rectangle source = {0,0 , (float)rpg.texture.width * flip_h, (float)rpg.texture.height}; //minus(-) in source's width mirrors the image horizontally
+
+
+                    Vector2 center = {rpg.width/2 + (player.facing_left? 12:-12), rpg.height/2 +2}; // rotation point
+                    //if (abs(rpg.rotation) > 90 && abs(rpg.rotation) <= 270) center = {rpg.width/2 + (player.facing_left? 8:-10), rpg.height/2 +2};
+                    if (abs(rpg.rotation) > 90 && abs(rpg.rotation) <= 270) center = {rpg.width/2 + (player.facing_left? 14:-14), rpg.height/2 +2};
+
+                    Rectangle source = {0,0 , (float)rpg.texture.width * (player.facing_left? -1: 1), (float)rpg.texture.height}; //minus(-) in source's width mirrors the image horizontally
                     if (abs(rpg.rotation) > 90 && abs(rpg.rotation) <= 270) {source.height = -source.height;}
 
-                    Vector2 position = {player_center_x + -32 + 6*flip_h + x_swing,player_center_y - 17 + y_swing};
+                    Vector2 position = {player_center_x + (player.facing_left? -38:-26) + x_swing,
+                                        player_center_y - 17 + y_swing};
+
+                    //if (abs(rpg.rotation) > 90 && abs(rpg.rotation) <= 270) {position.x += 4; position.y -= 4;}
+
                     Rectangle dest = { position.x + center.x, position.y + center.y, fabsf(source.width), fabsf(source.height) };
+
 
                     if (rpg.rotation > 360) {rpg.rotation -= 360;}
                     else if (rpg.rotation < -360) {rpg.rotation += 360;}
 
+
                     if(_draw_debug_info) DrawRectanglePro(dest, center, rpg.rotation, {220, 30, 30, 150}); // Draw rpg tex box
 
+
                     // REFACTOR THIS?
-                    Rectangle hand_source = {0,0 , (float)rpg_hand.width * flip_h, (float)rpg_hand.height};
+                    Rectangle hand_source = {0,0 , (float)rpg_hand.width * (player.facing_left? -1: 1), (float)rpg_hand.height};
                     if (abs(rpg.rotation) > 90 && abs(rpg.rotation) <= 270) {
                         hand_source.height = -hand_source.height;
-                        DrawTexturePro(rpg_hand, hand_source,{position.x + center.x , position.y + center.y, (float)rpg_hand.width , (float)rpg_hand.height}, {float(16 - 10*flip_h), 6}, rpg.rotation - 15*flip_h, WHITE); // DRAW HAND
+                        //DrawRectanglePro({position.x + center.x, position.y + center.y, 26, 6}, {+6, + (float)(player.facing_left ? 4 : 2)},hand_rotation + (player.facing_left ? 15 :-15), GetColor(0x873103ff)); // DRAW HAND
+                        DrawTexturePro(rpg_hand, hand_source,{position.x + center.x , position.y + center.y, (float)rpg_hand.width , (float)rpg_hand.height}, {(float)(player.facing_left? 26:6), 6},rpg.rotation + (player.facing_left ? 15 :-15), WHITE); // DRAW HAND
                         DrawTexturePro(rpg.texture, source, dest, center, rpg.rotation, WHITE);
                     }
                     else{
                         DrawTexturePro(rpg.texture, source, dest, center, rpg.rotation, WHITE);
-                        DrawTexturePro(rpg_hand, hand_source,{position.x + center.x, position.y + center.y, (float)rpg_hand.width , (float)rpg_hand.height}, {float(16 - 10*flip_h), 2}, rpg.rotation - 3*flip_h, WHITE); // DRAW HAND
+                        //DrawRectanglePro({position.x + center.x, position.y + center.y, 26, 6}, {+6, + (float)(player.facing_left ? 4 : 2)},hand_rotation + (player.facing_left ? 3 :-3), GetColor(0x873103ff)); // DRAW HAND
+                        DrawTexturePro(rpg_hand, hand_source,{position.x + center.x, position.y + center.y, (float)rpg_hand.width , (float)rpg_hand.height}, {+ (float)(player.facing_left? 26:6), 2},rpg.rotation + (player.facing_left ? 3 :-3), WHITE); // DRAW HAND
                     }
 
 

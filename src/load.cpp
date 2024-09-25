@@ -48,11 +48,13 @@ void load_level(Game_Level &level){
 
 //Load player spawnpoint in the level if specified
 void load_player_spawn(Game_Level &level, Player &player){
-    for (int x = 0; x < level.width; ++x) {
-        for (int y = 0; y < level.height; ++y) {
-            if (level.data[x][y] == 'P') {
-                player.x = x * 64;
-                player.y = y * 64;
+    for (int index_x = 0; index_x < level.width; ++index_x) {
+        for (int index_y = 0; index_y < level.height; ++index_y) {
+            float x = index_x * TILESIZE;
+            float y = index_y * TILESIZE;
+            if (level.data[index_x][index_y] == 'P') {
+                player.x = x;
+                player.y = y;
             }
         }
     }

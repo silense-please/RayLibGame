@@ -19,12 +19,11 @@ animation system and texture grouping
 screen proper scaling and stretching/letterboxing
 
 --IN PROGRESS
-
 make RPG-7
 add left stick movement
 
 --TODO - make test game (engine demo) - КОРОЧЕ ДЕЛАЙ УЖЕ МЕХАНИКИ ИГРЫ, А ВСЯКИЕ ВТОРОСТЕПЕННЫЕ МЕНЮ ПОТОМ
-event triggers in level , text in level (somewhere between the sacred ...)
+event triggers in level , text in level (somewhere between the sacred ...) - text is done
 sound (witness) system (sorry)
 (FULL) debug mode on/off switch
 
@@ -53,11 +52,12 @@ jump start amination -  ноги поджимать при начале прыж
 
 --AFTER DEMO:
 clean up this todo
+box2d v3
+add hot reloading system via dlls for debugging (TSoding, Karl Zylinski) - pleeeeaaase
 Подогнать все размеры спрайтов и игрока под "зум = 1" по умолчанию
 Try to reverse (play with) audio in standalone miniaudio test app
 How to include windows.h without funcs duplicating error?
 add draw smoothing to fast projectiles (e.g.rockets) - https://youtu.be/pnhJ5SDZpGU?si=scXMy6RU2_zMpQfC - TSoding
-add hot reloading system via dlls for debugging (TSoding, Karl Zylinski)
 rebuild(refactor) player accelerations to the real vectors
 mb collisions can be improved (collide by speed vectors) (the corners, step on platform if almost jumped high enough)
 Texture loading and unloading system (or just a separate file of loads) and characters' ids system to link them with texture

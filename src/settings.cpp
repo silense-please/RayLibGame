@@ -1,4 +1,17 @@
 
+void apply_screen_scale(){
+    screen_scale.x = (float) GetScreenWidth() / game_screen_width;
+    screen_scale.y = (float) GetScreenHeight() / game_screen_height;
+    screen_scale_min = MIN(screen_scale.x, screen_scale.y);
+    if (screen_scale_min == screen_scale.x) {
+        _screen_width = GetScreenWidth();
+        _screen_height = _screen_width / 1.77777f;
+    } else {
+        _screen_height = GetScreenHeight();
+        _screen_width = _screen_height * (16.0f / 9.0f);
+    }
+}
+
 void toggle_framelock(){
     if (_fps_lock){SetTargetFPS(0);}
     else{SetTargetFPS(TARGET_FPS);}

@@ -57,13 +57,13 @@ void static_objects_draw(Game_Level level, Texture2D &texture, char object_symbo
 // Draw animation from one row spritesheet
 void draw_player_animation(Player player, Animation &animation){
     int frames = animation.texture.width / TILESIZE;
-    bool flip = player.facing_left; //minus(-) in source's width mirrors image
+    int flip = player.facing_left ? -1: 1; //minus(-) in source's width mirrors the image
 
-    Rectangle run_frame_rec = {(float)animation.current_frame*(float)animation.texture.width / frames,0, (float)animation.texture.width / frames *(flip? -1: 1), (float)animation.texture.height};
+    Rectangle run_frame_rec = {(float)animation.current_frame*(float)animation.texture.width / frames,0, (float)animation.texture.width / frames * flip, (float)animation.texture.height};
     DrawTextureRec(animation.texture,run_frame_rec , (Vector2) {(float) player.x - player.width/2, (float) player.y}, WHITE);
     animation.timer += delta_time;
 
-    if(_draw_debug_info){ // Visualising to see if animations working properly
+    if(_draw_debug_info){ // Visualising to see if animations are working properly
         DrawText(TextFormat("%d", animation.current_frame ), player.x, player.y - 20, 5, animation.current_frame%2 == 0?LIME:BLUE);
         DrawText(TextFormat("timer: %f", animation.timer), player.x, player.y - 40, 20, animation.current_frame%2 == 0?LIME:BLUE);
     }

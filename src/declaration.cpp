@@ -61,7 +61,7 @@ const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config
 // @ Those probably shoud be const instead of define
 // (actually not even const for some, just global variables that are hard to change(underscored also?))
 #define GAME_SPEED 1.0 // for slow-mo  @ Change to mutable?
-#define DEFAULT_ZOOM 1.3
+#define DEFAULT_ZOOM 3 //1.3
 
 #define WALK_SPEED 600.0f
 #define GRAVITATION 2000.0f
@@ -114,6 +114,8 @@ struct Player{
     double jump_input_buffer_time = 0; // Player jumps right after landing - even if pressed jump right before landing
     double jump_input_hold_time = 0;
 
+    unsigned current_anim = 0;
+
     bool facing_left = 0; //  horizontal image flip (direction)
 
     bool is_standing = false; //standing on the ground
@@ -122,10 +124,20 @@ struct Player{
     bool is_levitating = false; //when player is not falling (noclip, etc) (no use now)
     bool is_walking = false;
 
+    bool is_idle = false;
+    bool is_running = false;
     bool started_jumping = false;
     bool started_falling = false;
     bool has_landed = false; // touched the ground after falling(floating)
 
+};
+
+struct RPG{
+    Texture2D texture;  // maybe put it separately in array later
+    Vector2 origin; // point to rotate from
+    float rotation;
+    float width = 64;
+    float height = 16;
 };
 
 struct Animation{
@@ -136,7 +148,7 @@ struct Animation{
     bool is_playing = false; // flag - to reset animation when it's done playing
 
     unsigned int current_frame = 0;
-    float timer = 0;// сколько времени показывается текущий кадр
+    float timer = 0;// сколько времени показывается текущий кадр (в секундах)
 };
 
 
@@ -164,7 +176,9 @@ enum menu_button{
 };
 
 // Settings functions
+void apply_screen_scale();
 void toggle_framelock();
+void toggle_vsync();
 void toggle_borderless();
 void toggle_fullscreen();
 
