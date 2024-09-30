@@ -20,12 +20,12 @@ screen proper scaling and stretching/letterboxing
 
 --IN PROGRESS
 make RPG-7
-add left stick movement
+add left stick movement - fix it
 
 --TODO - make test game (engine demo) - КОРОЧЕ ДЕЛАЙ УЖЕ МЕХАНИКИ ИГРЫ, А ВСЯКИЕ ВТОРОСТЕПЕННЫЕ МЕНЮ ПОТОМ
 event triggers in level , text in level (somewhere between the sacred ...) - text is done
 sound (witness) system (sorry)
-(FULL) debug mode on/off switch
+(FULL) debug mode on/off switch and toggle only certain elements(draw, input, performance, collision ...)
 
 --FINISH DEMO
 Make button input config (txt) file and load bindings from it
@@ -53,6 +53,7 @@ jump start amination -  ноги поджимать при начале прыж
 --AFTER DEMO:
 clean up this todo
 box2d v3
+try Tracy Profiler https://github.com/wolfpld/tracy
 add hot reloading system via dlls for debugging (TSoding, Karl Zylinski) - pleeeeaaase
 Подогнать все размеры спрайтов и игрока под "зум = 1" по умолчанию
 Try to reverse (play with) audio in standalone miniaudio test app
@@ -103,7 +104,7 @@ raylib supports OpenGl 4.3 ? then why does it runs on 3.3 now? -try 4.3, maybe i
     https://github.com/raysan5/raylib/wiki/raylib-platforms-and-graphics
 
 
---Performance:
+--Performance: (try Tracy Profiler https://github.com/wolfpld/tracy)
 Clock resolution of measure_time  ~ <= 0.2us (microsecond), raylib's GetTime() resolution = ~ 0.1-0.2us (WIN 10) which
 uses windows' QueryPerformanceCounter() - whose resolution = 0.1us
 maybe try later "__rdtsc()" (asm opcode RDTSC) - resolution < 10ns !!! (deeper asm knoledge needed)

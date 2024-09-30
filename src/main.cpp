@@ -10,6 +10,9 @@
 
 int main(void){
 
+    //Actions ACTION; - //@ wrap buttons into struct and walk through them all inside the func
+    input_mapping_check(BUTTON_JUMP);
+
     /// Initialization
     SetConfigFlags(FLAG_WINDOW_RESIZABLE /*| FLAG_MSAA_4X_HINT*/ | FLAG_WINDOW_ALWAYS_RUN ); // |FLAG_VSYNC_HINT);
     InitWindow(game_screen_width, game_screen_height, "RAYLIB-DEMO");
@@ -48,7 +51,7 @@ int main(void){
     // Use .at() instead of [] ??   ( [] operator generates new map member if it didn't find one)
     //https://www.youtube.com/watch?v=KiB0vRi2wlc
     std::unordered_map<unsigned int, Animation> anims_player  {
-            {PLAYER_RUN,        {LoadTexture("Game_Data/animations/player_run.png"), 0.07, true}},
+            {PLAYER_RUN,        {LoadTexture("Game_Data/animations/player_run.png"), 0.04, true}},
             {PLAYER_IDLE,       {LoadTexture("Game_Data/animations/player_idle.png"), 0.4, true}},
             {PLAYER_JUMP,       {LoadTexture("Game_Data/animations/player_jump.png"), 0.1, true}},
             {PLAYER_FALL,       {LoadTexture("Game_Data/animations/player_fall.png"),0.1, true}},
@@ -65,6 +68,7 @@ int main(void){
     Texture2D ground_texture = LoadTexture("Game_Data/ground.png");
     //Texture2D RPG = LoadTexture("Game_Data/animations/rpg-7.png");
     Texture2D rpg_hand = LoadTexture("Game_Data/animations/hand.png");
+    Texture2D rocket_tex = LoadTexture("Game_Data/animations/rocket.png");
 
     Player player;
     RPG rpg{LoadTexture("Game_Data/animations/rpg-7.png")};
@@ -139,8 +143,7 @@ int main(void){
 
         }
 
-        // @ commented temporary for rpg rotation debugging
-        //camera.zoom += ((float)GetMouseWheelMove() * 0.1f); //(0.1f*camera.zoom));
+        camera.zoom += ((float)GetMouseWheelMove() * 0.1f); //(0.1f*camera.zoom));
         if(!free_cam) // Camera just follows player for now
             camera.target = (Vector2){ player.x + player.width/2, player.y + player.height/2};
 
@@ -208,6 +211,8 @@ int main(void){
             ///  RUNNING
             else if (player.is_running) {
                 player.current_anim = PLAYER_RUN;
+                float speed = 0.07;
+                anims_player[PLAYER_RUN].speed = speed /   (fabs(player.speed.x) / WALK_SPEED ); //@ we need curve instead of line function
             }
             /// JUMPING
             else if (player.speed.y < 0) {
@@ -319,53 +324,104 @@ int main(void){
                     float player_center_x = (player.x + (player.width/2));
                     float player_center_y = (player.y + (player.height/2));
 
-                    //TODO: mouse&stick tracking, then missle launching point, then projectile, then explosion (steal particle animation from raylib demo); after this is done, clean up and move part of this in game logic
-
-                    rpg.rotation += ((float)GetMouseWheelMove() * 5.0f); // debugging
-
-                    /// Actually, we dont need to store rotation when we'll have a mouse position updating every frame
-                    static bool previous_facing_left = player.facing_left;
-                    if (previous_facing_left != player.facing_left){
-                        rpg.rotation = -rpg.rotation;
-                        previous_facing_left = player.facing_left;
-                    }
+                    //TODO: mouse/gamepad toggle?, store(remember) missle launching point, then projectile traverse & collision, then explosion (steal particle animation from raylib demo); after this is done, clean up and move part of this in game logic
 
 
                     int flip_h = player.facing_left ? -1: 1;
 
-                    Vector2 center = {rpg.width/2 -12*flip_h, rpg.height/2 +2}; // rotation point
-                    if (abs(rpg.rotation) > 90 && abs(rpg.rotation) <= 270) center = {rpg.width/2 -14*flip_h, rpg.height/2 +2};
+
+
+                    float rpg_x = player_center_x + -32 + (6 + x_swing) *flip_h;
+                    float rpg_y = player_center_y - 17 + y_swing ;
+
+                    Vector2 center = {rpg.width/2 -15*flip_h, rpg.height/2 +1}; // rotation point
+
+                    //rpg.rotation += ((float)GetMouseWheelMove() * 5.0f); // debugging
+
+                    //rpg.rotation = -RAD2DEG * Vector2Angle({rpg_x + center.x + rpg.width, +center.y}, {ingame_mouse.x - (rpg_x + center.x), (rpg_y+center.y) - ingame_mouse.y});
+
+
+                    float x_axis = GetGamepadAxisMovement(active_gamepad, 2);
+                    float y_axis = GetGamepadAxisMovement(active_gamepad, 3);
+
+
+                    float stick_axis = Vector2Angle({1,0}, {x_axis, y_axis});
+                    float dead_zone = 0.25;
+                    if (fabsf(x_axis) > dead_zone || fabsf(y_axis) > dead_zone){
+                        rpg.rotation = RAD2DEG * stick_axis;
+                        if(player.facing_left) rpg.rotation -= 180;
+                    }
+                    else{
+                        static bool previous_facing_left = player.facing_left;
+                        if (previous_facing_left != player.facing_left){
+                            previous_facing_left = player.facing_left;
+                            rpg.rotation = -rpg.rotation;
+                            //rpg.rotation -= 180;
+                        }
+                    }
+
+                    /// Actually, we dont need to store rotation when we'll have a mouse position updating every frame (but what if it's stick?)
+
 
                     Rectangle source = {0,0 , (float)rpg.texture.width * flip_h, (float)rpg.texture.height}; //minus(-) in source's width mirrors the image horizontally
-                    if (abs(rpg.rotation) > 90 && abs(rpg.rotation) <= 270) {source.height = -source.height;}
 
-                    Vector2 position = {player_center_x + -32 + 6*flip_h + x_swing,player_center_y - 17 + y_swing};
+
+                    if (abs(rpg.rotation) > 120 && abs(rpg.rotation) <= 270) {
+                        source.height = -source.height;
+                        center = {rpg.width/2 -15*flip_h, rpg.height/2 -2};
+                        rpg_y += 3;
+                    }
+
+                    Vector2 position = {rpg_x,rpg_y};
                     Rectangle dest = { position.x + center.x, position.y + center.y, fabsf(source.width), fabsf(source.height) };
 
-                    if (rpg.rotation > 360) {rpg.rotation -= 360;}
-                    else if (rpg.rotation < -360) {rpg.rotation += 360;}
+                    /*if (rpg.rotation > 360) {rpg.rotation -= 360;}        //@ deletable
+                    else if (rpg.rotation < -360) {rpg.rotation += 360;}*/
 
                     if(_draw_debug_info) DrawRectanglePro(dest, center, rpg.rotation, {220, 30, 30, 150}); // Draw rpg tex box
 
                     // REFACTOR THIS?
                     Rectangle hand_source = {0,0 , (float)rpg_hand.width * flip_h, (float)rpg_hand.height};
-                    if (abs(rpg.rotation) > 90 && abs(rpg.rotation) <= 270) {
+                    if (abs(rpg.rotation) > 120 && abs(rpg.rotation) <= 270) {
                         hand_source.height = -hand_source.height;
-                        DrawTexturePro(rpg_hand, hand_source,{position.x + center.x , position.y + center.y, (float)rpg_hand.width , (float)rpg_hand.height}, {float(16 - 10*flip_h), 6}, rpg.rotation - 15*flip_h, WHITE); // DRAW HAND
+                        DrawTexturePro(rpg_hand, hand_source,{position.x + center.x , position.y + center.y, (float)rpg_hand.width , (float)rpg_hand.height}, {float(16 - 12*flip_h), 6}, rpg.rotation - 5*flip_h, WHITE); // DRAW HAND
                         DrawTexturePro(rpg.texture, source, dest, center, rpg.rotation, WHITE);
                     }
                     else{
                         DrawTexturePro(rpg.texture, source, dest, center, rpg.rotation, WHITE);
-                        DrawTexturePro(rpg_hand, hand_source,{position.x + center.x, position.y + center.y, (float)rpg_hand.width , (float)rpg_hand.height}, {float(16 - 10*flip_h), 2}, rpg.rotation - 3*flip_h, WHITE); // DRAW HAND
+                        DrawTexturePro(rpg_hand, hand_source,{position.x + center.x, position.y + center.y, (float)rpg_hand.width , (float)rpg_hand.height}, {float(16 - 12*flip_h), 2}, rpg.rotation + 3*flip_h, WHITE); // DRAW HAND
                     }
 
 
+                    if(_draw_debug_info) {
+                        DrawRectangle(position.x + center.x - 1, position.y + center.y - 1, 1, 1,RED); // draw rpg center
 
-                    if(_draw_debug_info) DrawRectangle(position.x + center.x -1, position.y + center.y -1, 3, 3, RED); // draw rpg center
 
+                        Vector2 rocket_center =  Vector2Rotate({0,  -3}, rpg.rotation * DEG2RAD);
+                        if (abs(rpg.rotation) > 120 && abs(rpg.rotation) <= 270) {
+                            rocket_center =  Vector2Rotate({0,  -4}, (rpg.rotation-180) * DEG2RAD);
+                        }
+                        rocket_center.x += center.x;
+                        rocket_center.y += center.y;
+
+
+
+                        DrawRectangle(position.x +rocket_center.x - 1, position.y + rocket_center.y - 1, 1, 1,LIME); //draw rocket vector origin
+
+                        //Vector2 rocket = Vector2Rotate({35.f*flip_h , 0 }, rpg.rotation * DEG2RAD);
+                        Vector2 rocket = Vector2Rotate({ 35.f*flip_h, 0}, rpg.rotation * DEG2RAD);
+
+                        rocket.x += position.x + rocket_center.x;
+                        rocket.y += position.y + rocket_center.y;
+                        DrawRectangleV(rocket, {1,1},GREEN);
+                        /// ROCKET DRAW
+                        Rectangle rocket_source = {0,0, (float)rocket_tex.width * flip_h, (float)rocket_tex.height};
+                        Rectangle rocket_dest = {rocket.x,rocket.y, (float)rocket_tex.width, (float)rocket_tex.height};
+                        DrawTexturePro(rocket_tex, rocket_source, rocket_dest, {float(10 - 2*flip_h),4}, rpg.rotation, WHITE);
+                    }
                 }
 
-                static_objects_draw(current_level, ground_texture, 'G');
+                //static_objects_draw(current_level, ground_texture, 'G');
 
                 DrawText("Somewhere between the sacred silense and sleep...", 2200, 2500, 50, {194, 144, 87, 255});
                 if(_draw_debug_info)DrawRectangle(ingame_mouse.x - 3, ingame_mouse.y - 3, 8, 8, RED ); /// GAME MOUSE DEBUG
@@ -401,13 +457,13 @@ int main(void){
                     //@Temporary - move this ALL to draw debug info later
                     DrawRectangle(0,0,250,400,Color{0,0,0,180}); // Debug info opacity
 
-                    DrawText(TextFormat(PRINT_INT(player.has_landed)), 10, 40, 20, player.has_landed == 1 ? ORANGE : LIME);
-                    DrawText(TextFormat(PRINT_INT(player.is_standing)), 10, 80, 20, player.is_standing == 1 ? ORANGE : LIME);
+                    DrawText(PRINT_INT(player.has_landed), 10, 40, 20, player.has_landed == 1 ? ORANGE : LIME);
+                    DrawText(PRINT_INT(player.is_standing), 10, 80, 20, player.is_standing == 1 ? ORANGE : LIME);
                     DrawText(TextFormat("time of fall %.4f", player.time_of_fall), 10, 100, 20, LIME);
 
                     //DrawText(TextFormat(PRINT_INT(GetScreenWidth())), 10, 220, 20, LIME);
-                    DrawText(TextFormat(PRINT_FLOAT(rpg.rotation)), 10, 240, 20, LIME);
-                    DrawText(TextFormat(PRINT_FLOAT(ingame_screen_scaler.zoom)), 10, 280, 20, LIME);
+                    DrawText(PRINT_FLOAT(rpg.rotation), 10, 240, 20, LIME);
+                    DrawText(PRINT_FLOAT(ingame_screen_scaler.zoom), 10, 280, 20, LIME);
                     DrawText(TextFormat("avg time %.4f us", average_measured_time), 10, 320, 20, LIME);
 
                     if (free_cam) DrawText("FREE CAMREA", 700, 100, 40, DARKGREEN);
@@ -419,6 +475,9 @@ int main(void){
                     if(_fps_lock) DrawText("LOCKED", 210, 18, 10, GREEN);
 
                     DrawRectangle(GetMouseX()-2, GetMouseY()-2,5,5,GOLD); /// OVERLAY MOUSE
+
+                    DrawText(TextFormat("X axis %.4f",GetGamepadAxisMovement(active_gamepad, 2)),300, 10, 20, LIME );
+                    DrawText(TextFormat("Y axis %.4f",GetGamepadAxisMovement(active_gamepad, 3)),300, 30, 20, LIME );
                 }
             }
             EndMode2D(); //Overlay scaler

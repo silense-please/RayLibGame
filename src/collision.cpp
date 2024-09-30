@@ -44,7 +44,7 @@ void static_object_collision_by_speed(Player &player, Game_Level level) {
                         }
                     }
                     //Check if player is standing on the ground
-                    const float COLLISION_EPSILON = 0.01f;
+                    const float COLLISION_EPSILON = 0.01f; // there is a FloatEquals() func in raymath.h
                     if (abs(player.y + player.height - y) <= COLLISION_EPSILON && !player.started_jumping){
                         player.is_standing = true;
                     }

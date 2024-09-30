@@ -12,7 +12,7 @@
 #include <unordered_map>
 //#include <map>
 using std::string;
-using std::abs;
+//using std::abs; //there is C version - fabs, so use it.
 
 
 // Global variables (use 'extern' if breaks)
@@ -20,10 +20,11 @@ using std::abs;
 #define TILESIZE 64.0f
 
 #define MAKE_STRING(VARIABLE) (#VARIABLE) //STRINGIZING - this is just for convenicense of printing, for debugging, MIGHT BE DANGEROUS
-#define PRINT_INT(VAR) ("%s: %d\n"), (MAKE_STRING(VAR)), (VAR)   // prints name of variable and it's int value
-#define PRINT_FLOAT(VAR)   ("%s: %.4f\n"), (MAKE_STRING(VAR)), (VAR)  // prints name of variable and it's float value
+#define PRINT_INT(VAR)      TextFormat(("%s: %d\n"), (MAKE_STRING(VAR)), (VAR) ) // prints name of variable and it's int value
+#define PRINT_FLOAT(VAR) TextFormat(("%s: %.4f\n"), (MAKE_STRING(VAR)), (VAR) )  // prints name of variable and it's float value
 //DrawText(TextFormat("standing: %d", player.is_standing), 10, 40, 20, LIME); - Replaces something like that
 //DrawText(TextFormat( PRINT_INTEGER(player.is_standing) ), 10, 40, 20, LIME); - with that.
+// @ Incapsulater "TextFormat()" please
 
 #define MAX(a, b) ((a)>(b)? (a) : (b))
 #define MIN(a, b) ((a)<(b)? (a) : (b))
@@ -33,7 +34,7 @@ using std::abs;
 bool _is_borderless = false;
 bool _fps_lock = true;
 bool _vsync = true;
-bool _draw_debug_info = false;
+bool _draw_debug_info = true; //false;
 bool _is_paused = false;
 bool _is_menu = false;
 bool free_cam = false; // free camera for debug mode
@@ -61,7 +62,7 @@ const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config
 // @ Those probably shoud be const instead of define
 // (actually not even const for some, just global variables that are hard to change(underscored also?))
 #define GAME_SPEED 1.0 // for slow-mo  @ Change to mutable?
-#define DEFAULT_ZOOM 3 //1.3
+#define DEFAULT_ZOOM 6//1.3
 
 #define WALK_SPEED 600.0f
 #define GRAVITATION 2000.0f
@@ -76,8 +77,10 @@ const int max_gamepads = 4;//@Unresolved - MAX_GAMEPADS defined in raylib config
 #define MAX_FALL_SPEED 1600.0
 
 
-//Input bindings - be wary of same key duplicating to multiple buttons
+//Input bindings - be wary of same key duplicating to multiple buttons(actions)
 #define MAX_BUTTON_BINDINGS 5
+
+//struct BUTTON {
 string BUTTON_TOGGLE_BORDERLESS[MAX_BUTTON_BINDINGS]  {"KEY_F11"};
 string BUTTON_DEBUG_INFO[MAX_BUTTON_BINDINGS]  {"KEY_I"};
 string BUTTON_FRAMELOCK[MAX_BUTTON_BINDINGS]  {"KEY_L"};
@@ -91,11 +94,11 @@ string BUTTON_MMB[MAX_BUTTON_BINDINGS]  {"MOUSE_BUTTON_MIDDLE"};
 
 
 
-
-
 string BUTTON_MOVE_RIGHT[MAX_BUTTON_BINDINGS]  {"KEY_D", "KEY_RIGHT", "GAMEPAD_BUTTON_LEFT_FACE_RIGHT"};
 string BUTTON_MOVE_LEFT[MAX_BUTTON_BINDINGS]  {"KEY_A", "KEY_LEFT","GAMEPAD_BUTTON_LEFT_FACE_LEFT"};
-string BUTTON_JUMP[MAX_BUTTON_BINDINGS]  {"KEY_SPACE", "GAMEPAD_BUTTON_RIGHT_FACE_DOWN"};
+string BUTTON_JUMP[MAX_BUTTON_BINDINGS]  {"KEY_SPACE", "GAMEPAD_BUTTON_RIGHT_FACE_DOWN", "GAMEPAD_BUTTON_LEFT_TRIGGER_1" };
+
+//};
 
 
 struct Player{

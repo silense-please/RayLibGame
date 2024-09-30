@@ -1,3 +1,5 @@
+#include <cassert>
+
 int keyboard_key_int[] = {
         KEY_NULL            ,        // Key: NULL, used for no key pressed
         // Alphanumeric keys
@@ -306,7 +308,7 @@ enum {
     UP
 };
 
-bool process_button_input(string buttons[MAX_BUTTON_BINDINGS], int action){
+bool process_button_input(string buttons[MAX_BUTTON_BINDINGS], int action){ //@ rename "action" to "state"?
     bool passed = false;
     for (int binding = 0; binding < MAX_BUTTON_BINDINGS; ++binding) {
         if (buttons[binding][0] == 'K') { //KEY_ ...
@@ -355,6 +357,40 @@ bool process_button_input(string buttons[MAX_BUTTON_BINDINGS], int action){
     return passed;
 }
 
+void input_mapping_check(string buttons[MAX_BUTTON_BINDINGS]){
+    for (int binding = 0; binding < MAX_BUTTON_BINDINGS; ++binding) {
+        bool passed = false;
+        if (buttons[binding] == "") {passed = true; break;}
+        else if (buttons[binding][0] == 'K') { //KEY_ ...
+            for (int index = 0; index < sizeof(keyboard_key_str) / sizeof(*keyboard_key_str); ++index) {
+                if (keyboard_key_str[index] == buttons[binding]){
+                    passed = true;
+                    break;
+                }
+            }
+        }
+        else if (buttons[binding][0] == 'M') { // MOUSE_BUTTON_ ...
+            for (int index = 0; index < sizeof(mouse_button_str) / sizeof(*mouse_button_str); ++index) {
+                if (mouse_button_str[index] == buttons[binding]){
+                    passed = true;
+                    break;
+                }
+            }
+        }
+        else if (buttons[binding][0] == 'G') { // GAMEPAD_BUTTON_ ...
+            for (int index = 0; index < sizeof(gamepad_button_str) / sizeof(*gamepad_button_str); ++index) {
+                if (gamepad_button_str[index] == buttons[binding]){
+                    passed = true;
+                    break;
+                }
+            }
+        }
+        if (!passed){
+            printf("ERROR: \"%s\" button not found \n", buttons[binding].c_str());
+            total_errors++;
+        }
+    }
+}
 
 bool IsButtonPressed(string buttons[MAX_BUTTON_BINDINGS]){
     return process_button_input(buttons, PRESSED);
@@ -456,11 +492,22 @@ void process_input(Player &player, Camera2D &camera, Game_Level current_level) {
             }
         }
 
+        float previous_speed_x = player.speed.x;
 
         /// RUN
-        if (IsButtonDown(BUTTON_MOVE_LEFT)) { player.speed.x = -WALK_SPEED; player.is_walking = true; player.facing_left=1;}
-        else if (IsButtonDown(BUTTON_MOVE_RIGHT)) { player.speed.x = WALK_SPEED; player.is_walking = true; player.facing_left=0;}
-        else { player.speed.x = 0; player.is_walking = false;}
+        if (IsButtonDown(BUTTON_MOVE_LEFT)) { player.speed.x = -WALK_SPEED; }
+        else if (IsButtonDown(BUTTON_MOVE_RIGHT)) { player.speed.x = WALK_SPEED; }
+        else { player.speed.x = 0; }
+
+        /// @ change to ->  if walk keys pressed - player+= walk speed, and just cap the speed afted applying inputs: if speed.x is > abs(walk speed) - speed = walk speed * flip    (because keyboard and gamepad movement adds up)
+        /// по аналогии с MAX_FALL_SPEED
+
+
+        player.speed.x += WALK_SPEED* GetGamepadAxisMovement(active_gamepad, 0); // slow down the running animation??
+
+        if ( (player.speed.x > 0 && player.facing_left) || (player.speed.x < 0 && !player.facing_left) ) {
+            player.facing_left = !player.facing_left;
+        }
 
 
         if (IsButtonDown(BUTTON_RMB) /*&& free_cam*/) { //FREE CAMERA DRAG

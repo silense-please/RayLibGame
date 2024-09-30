@@ -68,12 +68,12 @@ void draw_player_animation(Player player, Animation &animation){
         DrawText(TextFormat("timer: %f", animation.timer), player.x, player.y - 40, 20, animation.current_frame%2 == 0?LIME:BLUE);
     }
 
-    if (animation.timer >= animation.speed){animation.current_frame ++; animation.timer = 0;} // Proceed to the next frame
+    if (animation.timer >= animation.speed){animation.current_frame++ ; animation.timer = 0;} // Proceed to the next frame
 
     if (animation.current_frame > frames-1) {
         if (animation.is_looping){ // Loop animation.
             animation.current_frame = 0;
-        } else{ // Animation is finished.
+        } else { // Animation is finished.
             animation.is_playing = false;
             animation.current_frame = 0;
             animation.timer = 0;
