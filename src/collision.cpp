@@ -16,6 +16,24 @@ void show_collision(Player player, Game_Level level) {
     }
 }
 
+bool rocket_collision(Game_Level &level, RPG rpg){// collision
+    float width = TILESIZE;
+    float height = TILESIZE;
+    for (int index_x = 0; index_x < level.width; ++index_x) {
+        for (int index_y = 0; index_y < level.height; ++index_y) {
+        float x = index_x * TILESIZE;
+        float y = index_y * TILESIZE;
+        if (level.data[index_x][index_y] == 'G') { // @ MAYBE MAKE PROPER ROTATED COLLISION BOX - LATER
+            if (CheckCollisionCircleRec({rpg.rocket.pos.x, rpg.rocket.pos.y}, rpg.rocket.RADIUS,(Rectangle){x, y, width, height})){ /// BOOM!
+                level.data[index_x][index_y] = ' '; // WTF THAT WAS UNEXPECTED TO WORK SO EASILY
+                return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 //Prevents from out of bounds
 void level_borders_collision(Player &player, Game_Level &level) {
     if(player.y+player.height > level.height*TILESIZE) player.y  = level.height*TILESIZE - player.height;

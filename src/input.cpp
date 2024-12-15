@@ -246,10 +246,10 @@ int gamepad_button_int[] ={
         GAMEPAD_BUTTON_RIGHT_FACE_RIGHT,    // Gamepad right button right (i.e. PS3: Circle, Xbox: B)
         GAMEPAD_BUTTON_RIGHT_FACE_DOWN,     // Gamepad right button down (i.e. PS3: Cross, Xbox: A)
         GAMEPAD_BUTTON_RIGHT_FACE_LEFT,     // Gamepad right button left (i.e. PS3: Square, Xbox: X)
-        GAMEPAD_BUTTON_LEFT_TRIGGER_1,      // Gamepad top/back trigger left (first), it could be a trailing button
-        GAMEPAD_BUTTON_LEFT_TRIGGER_2,      // Gamepad top/back trigger left (second), it could be a trailing button
-        GAMEPAD_BUTTON_RIGHT_TRIGGER_1,     // Gamepad top/back trigger right (one), it could be a trailing button
-        GAMEPAD_BUTTON_RIGHT_TRIGGER_2,     // Gamepad top/back trigger right (second), it could be a trailing button
+        GAMEPAD_BUTTON_LEFT_TRIGGER_1,      // Gamepad top/back trigger left (first), it could be a trailing button - L1
+        GAMEPAD_BUTTON_LEFT_TRIGGER_2,      // Gamepad top/back trigger left (second), it could be a trailing button - L2
+        GAMEPAD_BUTTON_RIGHT_TRIGGER_1,     // Gamepad top/back trigger right (one), it could be a trailing button - R1
+        GAMEPAD_BUTTON_RIGHT_TRIGGER_2,     // Gamepad top/back trigger right (second), it could be a trailing button - R2
         GAMEPAD_BUTTON_MIDDLE_LEFT,         // Gamepad center buttons, left one (i.e. PS3: Select)
         GAMEPAD_BUTTON_MIDDLE,              // Gamepad center buttons, middle one (i.e. PS3: PS, Xbox: XBOX)
         GAMEPAD_BUTTON_MIDDLE_RIGHT,        // Gamepad center buttons, right one (i.e. PS3: Start)
@@ -499,7 +499,7 @@ void process_input(Player &player, Camera2D &camera, Game_Level current_level) {
         else if (IsButtonDown(BUTTON_MOVE_RIGHT)) { player.speed.x = WALK_SPEED; }
         else { player.speed.x = 0; }
 
-        /// @ change to ->  if walk keys pressed - player+= walk speed, and just cap the speed afted applying inputs: if speed.x is > abs(walk speed) - speed = walk speed * flip    (because keyboard and gamepad movement adds up)
+        /// TODO @ change to ->  if walk keys pressed - player+= walk speed, and just cap the speed afted applying inputs: if speed.x is > abs(walk speed) - speed = walk speed * flip    (because keyboard and gamepad movement adds up)
         /// по аналогии с MAX_FALL_SPEED
 
 

@@ -10,8 +10,10 @@
 
 int main(void){
 
-    //Actions ACTION; - //@ wrap buttons into struct and walk through them all inside the func
+    //Actions ACTION; - //TODO @ wrap buttons into struct and walk through them all inside the func to spellcheck
     input_mapping_check(BUTTON_JUMP);
+    input_mapping_check(BUTTON_FIRE);
+
 
     /// Initialization
     SetConfigFlags(FLAG_WINDOW_RESIZABLE /*| FLAG_MSAA_4X_HINT*/ | FLAG_WINDOW_ALWAYS_RUN ); // |FLAG_VSYNC_HINT);
@@ -59,6 +61,10 @@ int main(void){
             {PLAYER_JUMP_START, {LoadTexture("Game_Data/animations/player_jump_start.png"), 0.1, false}},
             {PLAYER_LANDED,     {LoadTexture("Game_Data/animations/player_fall_end.png"),0.05, false}},
     };
+
+    Animation explosion = {LoadTexture("Game_Data/animations/explosion.png"), 0.05, false};
+
+
     // Default wrapping (repeat) distorts edges of sprites when they're scaled imperfectly (e.g. on camera zoom = 1.6).
     for ( auto& [name, anim] : anims_player) { //@ NO NEED ANYMORE? FIXED?
         SetTextureWrap(anim.texture, TEXTURE_WRAP_CLAMP);
@@ -91,6 +97,8 @@ int main(void){
     Music music = LoadMusicStream("Game_Data/test_music.mp3");
     music.looping = false;
     PlayMusicStream(music);
+    Sound boom = LoadSound("Game_Data/boom.mp3");
+    SetSoundVolume(boom, 0.03);
 
     bool close_window = 0;
 
@@ -300,6 +308,8 @@ int main(void){
                     draw_player_animation(player, anims_player[player.current_anim]);
                 }
 
+
+
                 { /// Draw RPG
                 // Sorry, this is just a mess instead of a proper animation system but it's enough for now.
                     //float swing_test = anims_player[player.current_anim].current_frame == 0? 0 : 2; // use player_anim.speed to be in tact with it - @deletable
@@ -324,11 +334,11 @@ int main(void){
                     float player_center_x = (player.x + (player.width/2));
                     float player_center_y = (player.y + (player.height/2));
 
-                    //TODO: mouse/gamepad toggle?, store(remember) missle launching point, then projectile traverse & collision, then explosion (steal particle animation from raylib demo); after this is done, clean up and move part of this in game logic
-
+                    //TODO:  pixelate and polish explosion draw, after this is done, clean up and move part of this in game logic
+                    // then - multiple rockets, reloading missile when rpg looks down,
+                    // add explosion collision circle to destroy surrounding breakable blocks
 
                     int flip_h = player.facing_left ? -1: 1;
-
 
 
                     float rpg_x = player_center_x + -32 + (6 + x_swing) *flip_h;
@@ -336,34 +346,36 @@ int main(void){
 
                     Vector2 center = {rpg.width/2 -15*flip_h, rpg.height/2 +1}; // rotation point
 
-                    //rpg.rotation += ((float)GetMouseWheelMove() * 5.0f); // debugging
-
-                    //rpg.rotation = -RAD2DEG * Vector2Angle({rpg_x + center.x + rpg.width, +center.y}, {ingame_mouse.x - (rpg_x + center.x), (rpg_y+center.y) - ingame_mouse.y});
 
 
-                    float x_axis = GetGamepadAxisMovement(active_gamepad, 2);
-                    float y_axis = GetGamepadAxisMovement(active_gamepad, 3);
-
-
-                    float stick_axis = Vector2Angle({1,0}, {x_axis, y_axis});
-                    float dead_zone = 0.25;
-                    if (fabsf(x_axis) > dead_zone || fabsf(y_axis) > dead_zone){
-                        rpg.rotation = RAD2DEG * stick_axis;
+                    if (!IsGamepadAvailable(active_gamepad)){ // MOUSE OR GAMEPAD
+                        rpg.rotation = -RAD2DEG * Vector2Angle({rpg_x + center.x + rpg.width, center.y},
+                            {ingame_mouse.x - (rpg_x + center.x),(rpg_y + center.y) - ingame_mouse.y}); // @Later. Angle is slightly wrong. We need circle tangent line for this.
                         if(player.facing_left) rpg.rotation -= 180;
                     }
                     else{
-                        static bool previous_facing_left = player.facing_left;
-                        if (previous_facing_left != player.facing_left){
-                            previous_facing_left = player.facing_left;
-                            rpg.rotation = -rpg.rotation;
-                            //rpg.rotation -= 180;
+
+                        float x_axis = GetGamepadAxisMovement(active_gamepad, 2);
+                        float y_axis = GetGamepadAxisMovement(active_gamepad, 3);
+
+                        float stick_axis = Vector2Angle({1,0}, {x_axis, y_axis});
+                        float dead_zone = 0.35;
+                        if (fabsf(x_axis) > dead_zone || fabsf(y_axis) > dead_zone){
+                            rpg.rotation = RAD2DEG * stick_axis;
+                            if(player.facing_left) rpg.rotation -= 180;
+                        }
+                        else{ // We are not updating rotation if stick is at {0,0} to store the angle and don't reset it.
+                            static bool previous_facing_left = player.facing_left;
+                            if (previous_facing_left != player.facing_left){
+                                previous_facing_left = player.facing_left;
+                                rpg.rotation = -rpg.rotation;
+                            }
                         }
                     }
 
-                    /// Actually, we dont need to store rotation when we'll have a mouse position updating every frame (but what if it's stick?)
+                    /// Actually, we dont need to store rotation when we'll have a mouse position updating every frame (but what if it's a stick?)
 
-
-                    Rectangle source = {0,0 , (float)rpg.texture.width * flip_h, (float)rpg.texture.height}; //minus(-) in source's width mirrors the image horizontally
+                    Rectangle source = {0,0 , (float)rpg.texture.width * flip_h, (float)rpg.texture.height};
 
 
                     if (abs(rpg.rotation) > 120 && abs(rpg.rotation) <= 270) {
@@ -380,7 +392,73 @@ int main(void){
 
                     if(_draw_debug_info) DrawRectanglePro(dest, center, rpg.rotation, {220, 30, 30, 150}); // Draw rpg tex box
 
+
+
+                    const int RPG_CENTER_OFFSET_WHEN_FORWARD = -3;
+                    Vector2 rocket_center =  Vector2Rotate({0,  RPG_CENTER_OFFSET_WHEN_FORWARD}, rpg.rotation * DEG2RAD);
+                    if (abs(rpg.rotation) > 120 && abs(rpg.rotation) <= 270) {
+                        const int RPG_CENTER_OFFSET_WHEN_BACKWARD = -4;
+                        rocket_center =  Vector2Rotate({0,  RPG_CENTER_OFFSET_WHEN_BACKWARD}, (rpg.rotation-180) * DEG2RAD);
+                    }
+                    rocket_center.x += center.x;
+                    rocket_center.y += center.y;
+
+                    const float RPG_LENGTH = 35.f;
+                    Vector2 rocket_dir = Vector2Rotate({RPG_LENGTH * flip_h, 0}, rpg.rotation * DEG2RAD); /// НАПРАВЛЕНИЕ ВЫСТРЕЛА
+
+                    if(!rpg.rocket.launched){
+                        rpg.rocket.pos = {position.x +rocket_center.x +rocket_dir.x, position.y + rocket_center.y + rocket_dir.y};
+                        rpg.rocket.rotation = rpg.rotation;
+
+                        if(IsButtonPressed(BUTTON_FIRE)){
+                            rpg.rocket.launched = true;
+                            rpg.rocket.dir = rocket_dir; // We save the direction so rocket flies straight and doesn't become homing. (Wink wink)
+                        }
+                    }
+
+                    static Vector2 explosion_pos = {0};
+
+                    if(rpg.rocket.launched){
+                        //draw rpg firing
+
+                        const int ROCKET_SPEED = 20;
+                        rpg.rocket.pos.x += rpg.rocket.dir.x * ROCKET_SPEED * delta_time;
+                        rpg.rocket.pos.y += rpg.rocket.dir.y * ROCKET_SPEED * delta_time;
+
+                        static double launch_timer = 0; // That's just a hack. Reset "launched" upon collision. No it's not a hack, we need to kill rocket if its out of bounds after some time.
+                        launch_timer += delta_time;
+                        if (launch_timer > 6.0) { rpg.rocket.launched = false; launch_timer = 0;}
+
+                        if(_draw_debug_info) DrawCircle(rpg.rocket.pos.x, rpg.rocket.pos.y, rpg.rocket.RADIUS, RED); /// draw rocket collision
+
+
+                        if (rocket_collision(current_level, rpg)){ /// DETONATE
+                            rpg.rocket.launched = false;
+                            launch_timer = 0;
+                            PlaySound(boom);
+                            // rpg.rocket.pos - where to detonate
+                            { /// EXPLOTION DRAW (MOVE IT)
+                                explosion.is_playing = true;
+                                explosion_pos = rpg.rocket.pos;
+                                explosion.current_frame = 0;
+
+                            }
+
+                            /// if explosion radius(cirle) collides with breakable ground -> level.data[index_x][index_y] = ' ';
+                        }
+
+                    }
+
+                    if(explosion.is_playing) draw_animation(explosion, 25, explosion_pos);
+
+
+                    /// ROCKET DRAW
+                    Rectangle rocket_source = {0,0, (float)rocket_tex.width * flip_h, (float)rocket_tex.height};
+                    Rectangle rocket_dest = {rpg.rocket.pos.x,rpg.rocket.pos.y, (float)rocket_tex.width, (float)rocket_tex.height};
+                    DrawTexturePro(rocket_tex, rocket_source, rocket_dest, {float(10 - 2*flip_h),4}, rpg.rocket.rotation, WHITE);
+
                     // REFACTOR THIS?
+                    /// RPG DRAW
                     Rectangle hand_source = {0,0 , (float)rpg_hand.width * flip_h, (float)rpg_hand.height};
                     if (abs(rpg.rotation) > 120 && abs(rpg.rotation) <= 270) {
                         hand_source.height = -hand_source.height;
@@ -392,36 +470,15 @@ int main(void){
                         DrawTexturePro(rpg_hand, hand_source,{position.x + center.x, position.y + center.y, (float)rpg_hand.width , (float)rpg_hand.height}, {float(16 - 12*flip_h), 2}, rpg.rotation + 3*flip_h, WHITE); // DRAW HAND
                     }
 
-
                     if(_draw_debug_info) {
-                        DrawRectangle(position.x + center.x - 1, position.y + center.y - 1, 1, 1,RED); // draw rpg center
 
-
-                        Vector2 rocket_center =  Vector2Rotate({0,  -3}, rpg.rotation * DEG2RAD);
-                        if (abs(rpg.rotation) > 120 && abs(rpg.rotation) <= 270) {
-                            rocket_center =  Vector2Rotate({0,  -4}, (rpg.rotation-180) * DEG2RAD);
-                        }
-                        rocket_center.x += center.x;
-                        rocket_center.y += center.y;
-
-
-
-                        DrawRectangle(position.x +rocket_center.x - 1, position.y + rocket_center.y - 1, 1, 1,LIME); //draw rocket vector origin
-
-                        //Vector2 rocket = Vector2Rotate({35.f*flip_h , 0 }, rpg.rotation * DEG2RAD);
-                        Vector2 rocket = Vector2Rotate({ 35.f*flip_h, 0}, rpg.rotation * DEG2RAD);
-
-                        rocket.x += position.x + rocket_center.x;
-                        rocket.y += position.y + rocket_center.y;
-                        DrawRectangleV(rocket, {1,1},GREEN);
-                        /// ROCKET DRAW
-                        Rectangle rocket_source = {0,0, (float)rocket_tex.width * flip_h, (float)rocket_tex.height};
-                        Rectangle rocket_dest = {rocket.x,rocket.y, (float)rocket_tex.width, (float)rocket_tex.height};
-                        DrawTexturePro(rocket_tex, rocket_source, rocket_dest, {float(10 - 2*flip_h),4}, rpg.rotation, WHITE);
+                        DrawRectangle(position.x + center.x , position.y + center.y , 1, 1,RED); // draw rpg center
+                        DrawRectangleV({position.x +rocket_center.x , position.y + rocket_center.y }, {2, 2},BLACK); //draw rocket vector origin
+                        DrawRectangleV(rpg.rocket.pos, {1,1},GREEN); /// ROCKET STARTING POINT
                     }
-                }
+                }  /// --- RPG DRAW
 
-                //static_objects_draw(current_level, ground_texture, 'G');
+                static_objects_draw(current_level, ground_texture, 'G');
 
                 DrawText("Somewhere between the sacred silense and sleep...", 2200, 2500, 50, {194, 144, 87, 255});
                 if(_draw_debug_info)DrawRectangle(ingame_mouse.x - 3, ingame_mouse.y - 3, 8, 8, RED ); /// GAME MOUSE DEBUG
@@ -465,6 +522,7 @@ int main(void){
                     DrawText(PRINT_FLOAT(rpg.rotation), 10, 240, 20, LIME);
                     DrawText(PRINT_FLOAT(ingame_screen_scaler.zoom), 10, 280, 20, LIME);
                     DrawText(TextFormat("avg time %.4f us", average_measured_time), 10, 320, 20, LIME);
+
 
                     if (free_cam) DrawText("FREE CAMREA", 700, 100, 40, DARKGREEN);
 

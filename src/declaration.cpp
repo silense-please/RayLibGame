@@ -97,6 +97,7 @@ string BUTTON_MMB[MAX_BUTTON_BINDINGS]  {"MOUSE_BUTTON_MIDDLE"};
 string BUTTON_MOVE_RIGHT[MAX_BUTTON_BINDINGS]  {"KEY_D", "KEY_RIGHT", "GAMEPAD_BUTTON_LEFT_FACE_RIGHT"};
 string BUTTON_MOVE_LEFT[MAX_BUTTON_BINDINGS]  {"KEY_A", "KEY_LEFT","GAMEPAD_BUTTON_LEFT_FACE_LEFT"};
 string BUTTON_JUMP[MAX_BUTTON_BINDINGS]  {"KEY_SPACE", "GAMEPAD_BUTTON_RIGHT_FACE_DOWN", "GAMEPAD_BUTTON_LEFT_TRIGGER_1" };
+string BUTTON_FIRE[MAX_BUTTON_BINDINGS]  {"KEY_E", "GAMEPAD_BUTTON_RIGHT_TRIGGER_2"};
 
 //};
 
@@ -135,12 +136,21 @@ struct Player{
 
 };
 
+struct Rocket{
+    Vector2 pos;
+    Vector2 dir;
+    float rotation;
+    const int RADIUS = 9;
+    bool launched = 0;
+};
+
 struct RPG{
     Texture2D texture;  // maybe put it separately in array later
     Vector2 origin; // point to rotate from
     float rotation;
     float width = 64;
     float height = 16;
+    Rocket rocket;
 };
 
 struct Animation{
